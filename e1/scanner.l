@@ -11,7 +11,7 @@
 %option yylineno
 
 special_char	[,;:\(\)\{\}\+\-\*\/\%\^\<\>=!]
-literal_char	['][\\]?[[:graph:]]?[']
+literal_char	['][\\]?[^']?[']
 literal_float 	[+-]?[[:digit:]]+[\.][[:digit:]]+
 literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
 
@@ -64,8 +64,8 @@ literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
 
  /* Caso não encaixe em nenhum padrão acima, retorna um erro com uma mensagem */
 .	{	
-		fprintf(stderr, "ERROR (line %lu): The sequence bellow doesn't match with any of our patterns\n%s\n", yylineno, yytext);
 		return TK_ERRO;
 	}
 
 %%
+

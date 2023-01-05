@@ -11,7 +11,7 @@
 %option yylineno
 
 special_char	[,;:\(\)\{\}\+\-\*\/\%\^\<\>=!]
-literal_char	['][\\]?[[:graph:]]?[']
+literal_char	['][\\]?[^']?[']
 literal_float 	[+-]?[[:digit:]]+[\.][[:digit:]]+
 literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
 

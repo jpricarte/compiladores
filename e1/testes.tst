@@ -36,6 +36,7 @@ souUmaSequencia
 ''
 '\n'
 '\0'
+' '
 %
 
 oi^

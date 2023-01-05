@@ -38,7 +38,7 @@ void yyerror (const char *msg);
 %%
 
 programa: lista_elem
-        | ;
+        | %empty;
 
 lista_elem: var_global
 	      | funcao
@@ -78,7 +78,7 @@ corpo_funcao: bloco_comandos;
 
 /* Bloco de comandos */
 bloco_comandos: '{' lista_comandos '}'
-              | ;
+              | %empty;
 
 lista_comandos: comando_simples ';'
               | lista_comandos comando_simples ';' ;
@@ -90,7 +90,36 @@ comando_simples: var_local
                | cham_funcao
                | bloco_comandos;
 
-var_local: '!';
+var_local: TK_PR_INT lista_var_local_int
+         | TK_PR_FLOAT lista_var_local_float
+         | TK_PR_BOOL lista_var_local_bool
+         | TK_PR_CHAR lista_var_local_char;
+
+lista_var_local_int: var_local_int
+                   | lista_var_local_int ',' var_local_int;
+
+var_local_int: TK_IDENTIFICADOR
+             | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT;
+
+lista_var_local_float: var_local_float
+                     | lista_var_local_float ',' var_local_float;
+
+var_local_float: TK_IDENTIFICADOR
+               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT;
+
+lista_var_local_bool: var_local_bool
+                    | lista_var_local_bool ',' var_local_bool;
+
+var_local_bool: TK_IDENTIFICADOR
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE;
+
+lista_var_local_char: var_local_char
+                    | lista_var_local_char ',' var_local_char;
+
+var_local_char: TK_IDENTIFICADOR
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR;
+
 atribuicao: '%';
 con_fluxo: '*';
 op_retorno: '-';
