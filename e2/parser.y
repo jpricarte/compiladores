@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+extern int get_line_number();
 int yylex(void);
 void yyerror (const char *msg);
 %}
@@ -125,10 +126,11 @@ con_fluxo: '*';
 op_retorno: '-';
 cham_funcao: '=';
 
+
 %%
 
 void yyerror (const char *msg) {
-    printf("erro sintatico na linha %d: %s\n", 0, msg);
+    printf("erro sintatico na linha %d: %s\n", get_line_number(), msg);
     
 }
 
