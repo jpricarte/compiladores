@@ -1699,7 +1699,6 @@ yyreturnlab:
 
 
 void yyerror (const char *msg) {
-    printf("erro sintatico na linha %d: %s\n", get_line_number(), msg);
-    
+    fprintf(stderr, "line %d: %s\n", get_line_number(), msg);
 }
 
