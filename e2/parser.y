@@ -67,7 +67,8 @@ funcao: TK_PR_INT TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao
       | TK_PR_BOOL TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao
       | TK_PR_CHAR TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao;
 
-lista_parametros: parametro
+lista_parametros: %empty
+                | parametro
                 | lista_parametros ',' parametro;
 
 parametro: TK_PR_INT TK_IDENTIFICADOR
@@ -91,23 +92,27 @@ comando_simples: var_local
                | cham_funcao
                | bloco_comandos;
 
+/* Definição de variável local, permitindo apenas literais do tipo correspondente */
 var_local: TK_PR_INT lista_var_local_int
          | TK_PR_FLOAT lista_var_local_float
          | TK_PR_BOOL lista_var_local_bool
          | TK_PR_CHAR lista_var_local_char;
 
+/* inteiro */
 lista_var_local_int: var_local_int
                    | lista_var_local_int ',' var_local_int;
 
 var_local_int: TK_IDENTIFICADOR
              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT;
 
+/* ponto flutuante */
 lista_var_local_float: var_local_float
                      | lista_var_local_float ',' var_local_float;
 
 var_local_float: TK_IDENTIFICADOR
                | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT;
 
+/* booleano */
 lista_var_local_bool: var_local_bool
                     | lista_var_local_bool ',' var_local_bool;
 
@@ -115,20 +120,40 @@ var_local_bool: TK_IDENTIFICADOR
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE;
 
+/* caracter */
 lista_var_local_char: var_local_char
                     | lista_var_local_char ',' var_local_char;
 
 var_local_char: TK_IDENTIFICADOR
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR;
 
-atribuicao: '%';
-con_fluxo: '*';
-op_retorno: '-';
-cham_funcao: '=';
+/* Comando de Atribuição */
+atribuicao: id_atribuicao '=' expressao;
 
+id_atribuicao: TK_IDENTIFICADOR
+             | TK_IDENTIFICADOR ':' lista_indices;
+
+lista_indices: expressao
+             | lista_indices '^' expressao;
+
+/* Chamada de função */
+cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')';
+
+lista_argumentos: %empty
+                | expressao
+                | lista_argumentos ',' expressao;
+
+/* Controle de fluxo */
+con_fluxo: '*';
+
+/* Comando de fetorno */
+op_retorno: '-';
+
+/* Expressão (usado nos comandos simples) */
+expressao: '%';
 
 %%
-
+/* Declaração da função de erro */
 void yyerror (const char *msg) {
     fprintf(stderr, "line %d: %s\n", get_line_number(), msg);
 }
