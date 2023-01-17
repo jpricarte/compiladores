@@ -44,7 +44,7 @@ programa: lista_elem
 lista_elem: var_global
 	      | funcao
 	      | lista_elem var_global
-          | lista_elem funcao;
+              | lista_elem funcao;
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';';

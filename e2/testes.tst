@@ -1,3 +1,10 @@
+// Esse é um comentário monolinha
+
+/*
+    Esse é um
+    comentário multi linha
+*/
+
 bool var, varA [3], varB [3^4];
 
 bool bar() {
@@ -14,7 +21,7 @@ int foo (int a, float b) {
     va = true;
     bar();
     {
-        var[1^4*2] = 2;
+        var[1^4*2] = 6 * (2+7) != 5;
         bool vg <= true, vh, vi <= false;
         char vj <= 'a', vk, vl <= ' ';
         return 0;        

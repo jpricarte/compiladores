@@ -12,8 +12,10 @@
 
 special_char	[,;:\(\)\{\}\+\-\*\/\%\^\<\>=!\[\]]
 literal_char	['][\\]?[^']?[']
-literal_float 	[+-]?[[:digit:]]+[\.][[:digit:]]+
-literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
+literal_float 	[-]?[[:digit:]]+[\.][[:digit:]]+
+literal_scifl   [-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
+literal_int		[-]?[[:digit:]]+
+identificador	[[:alpha:]]+
 
 %x comment
 
@@ -53,8 +55,8 @@ literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
 "||"			{return TK_OC_OR;}
 
  /* Termos que precisam de RegEx: Identidificador e literais */
-[[:alpha:]]+		{return TK_IDENTIFICADOR;}
-[+-]?[[:digit:]]+	{return TK_LIT_INT;}
+{identificador}		{return TK_IDENTIFICADOR;}
+{literal_int}		{return TK_LIT_INT;}
 {literal_float}		{return TK_LIT_FLOAT;}
 {literal_scifl}		{return TK_LIT_FLOAT;}
 {literal_char}		{return TK_LIT_CHAR;}
@@ -63,8 +65,6 @@ literal_scifl   [+-]?[[:digit:]]+[\.][[:digit:]]+[Ee][+-]?[[:digit:]]+
 {special_char}		{return (int) yytext[0];}
 
  /* Caso não encaixe em nenhum padrão acima, retorna um erro com uma mensagem */
-.	{	
-		return TK_ERRO;
-	}
+.	{return TK_ERRO;}
 
 %%
