@@ -1,5 +1,28 @@
+#!/usr/bin/env zsh
+
+#Variaveis
+EXEC=etapa3
+TESTE=testes.tst
+
 # Para Compilar
-make
+make > /dev/null;
 
 # Para Executar 
-./etapa2 < testes.tst
+cat ./$TESTE | valgrind ./$EXEC &> ./output.log;
+
+# Definicao do teste
+grep "no leaks are possible" ./output.log > /dev/null;
+
+# Definindo o que sera visto no estes
+RESULTADO=$?;
+
+# Caso o teste seja aprovado REDEFINIR CASO MUDE
+if [ $? -eq 0 ]; then
+    echo "Teste aprovado";
+    rm output.log;
+    exit 0;
+# Caso o teste seja reprovado REDEFINIR CASO MUDE
+else
+    echo "Teste reprovado, veja o output";
+    exit 1;
+fi

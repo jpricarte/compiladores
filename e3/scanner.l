@@ -4,7 +4,9 @@
  */
 %{
 	#include <iostream>
+	#include <string>
 	#include "parser.tab.h"
+	#include "tree.hh"
 %}
 
 %option noyywrap
@@ -55,14 +57,25 @@ identificador	[[:alpha:]]+
 "||"			{return TK_OC_OR;}
 
  /* Termos que precisam de RegEx: Identidificador e literais */
-{identificador}		{return TK_IDENTIFICADOR;}
-{literal_int}		{return TK_LIT_INT;}
-{literal_float}		{return TK_LIT_FLOAT;}
-{literal_scifl}		{return TK_LIT_FLOAT;}
-{literal_char}		{return TK_LIT_CHAR;}
-
+{identificador} {
+	return TK_IDENTIFICADOR;
+}
+{literal_int} {
+	return TK_LIT_INT;
+	}
+{literal_float} {
+	return TK_LIT_FLOAT;
+}
+{literal_scifl} {
+	return TK_LIT_FLOAT;
+}
+{literal_char} {
+	return TK_LIT_CHAR;
+}
  /* Caracteres especiais, retornam o próprio código ASCII */
-{special_char}		{return (int) yytext[0];}
+{special_char} {
+	return (int) yytext[0];
+}
 
  /* Caso não encaixe em nenhum padrão acima, retorna um erro com uma mensagem */
 .	{return TK_ERRO;}

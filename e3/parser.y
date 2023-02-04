@@ -1,9 +1,22 @@
 %{
 #include <iostream>
+#include <memory>
 extern int get_line_number();
 int yylex(void);
 void yyerror (const char *msg);
 %}
+
+%require "3.0.4"
+
+%code requires {
+    #include <memory>
+    #include "tree.hh"
+}
+
+%union {
+    Node* valor_lexico;
+}
+
 
 %define parse.error verbose
 
@@ -41,9 +54,9 @@ programa: lista_elem
         | %empty;
 
 lista_elem: var_global
-	      | funcao
-	      | lista_elem var_global
-              | lista_elem funcao;
+	  | funcao
+	  | var_global lista_elem
+      | funcao lista_elem;
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';';
