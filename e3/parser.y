@@ -54,9 +54,9 @@ programa: lista_elem
         | %empty;
 
 lista_elem: var_global
-	  | funcao
-	  | var_global lista_elem
-      | funcao lista_elem;
+	      | funcao
+	      | var_global lista_elem
+          | funcao lista_elem;
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';';
@@ -64,7 +64,7 @@ var_global: tipo_primitivo lista_id_var_global ';';
 lista_id_var_global: id_var_global
                    | lista_id_var_global ',' id_var_global;
 
-id_var_global: TK_IDENTIFICADOR
+id_var_global: TK_IDENTIFICADOR 
              | TK_IDENTIFICADOR '[' lista_dimensoes ']';
 
 lista_dimensoes: TK_LIT_INT

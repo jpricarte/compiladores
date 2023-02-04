@@ -2,7 +2,7 @@
 
 #Variaveis
 EXEC=etapa3
-TESTE=testes.tst
+TESTE=testes/1.tst
 
 # Para Compilar
 make > /dev/null;

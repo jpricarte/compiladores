@@ -1,3 +1,1 @@
-int foo() {
-    bool var;
-}
+bool var;

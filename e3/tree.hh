@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '^', '[', ']'};
+
 enum class TokenType {
     SPECIAL_CHAR, // std::string
     RESERVED_WORD, // std::string
@@ -25,8 +27,15 @@ struct LexicalVal {
 
 struct Node {
     LexicalVal lex_val;
-    std::vector<std::unique_ptr<Node>> next_nodes;
+    std::vector<std::unique_ptr<Node>> children;
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
+
+    // Save child in children vector, using smart pointer
+    void insert_child(Node* child);
+    // Return True if is a useless token (such as '{' or "then")
+    bool is_useless();
 };
+
+typedef std::unique_ptr<Node> Node_p;
