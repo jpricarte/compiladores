@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 11 "parser.y"
+#line 12 "parser.y"
 
     #include <memory>
     #include "tree.hh"
@@ -94,7 +94,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 16 "parser.y"
+#line 17 "parser.y"
 
     Node* valor_lexico;
 

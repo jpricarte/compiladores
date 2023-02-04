@@ -33,7 +33,7 @@ struct Node {
     Node(int line_no, TokenType token_type, TokenVal token_val);
 
     // Save child in children vector, using smart pointer
-    void insert_child(Node* child);
+    void add_child(Node* child);
     // Return True if is a useless token (such as '{' or "then")
     bool is_useless();
 };

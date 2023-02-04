@@ -84,7 +84,7 @@ identificador	[[:alpha:]]+
 }
 
 "for" {
-    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("for"));
+    yylval.valor_lexico = nullptr;
     return TK_PR_FOR;
 }
 

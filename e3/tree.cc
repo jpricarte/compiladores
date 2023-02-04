@@ -10,7 +10,7 @@ Node::Node(int line_no, TokenType token_type, TokenVal token_val) {
     this->lex_val = LexicalVal{line_no, token_type, token_val};
 }
 
-void Node::insert_child(Node* child) {
+void Node::add_child(Node* child) {
     if (child != nullptr) {
         this->children.push_back(Node_p(child));
     }

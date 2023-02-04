@@ -968,7 +968,7 @@ case 19:
 YY_RULE_SETUP
 #line 87 "scanner.l"
 {
-    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("for"));
+    yylval.valor_lexico = nullptr;
     return TK_PR_FOR;
 }
 	YY_BREAK
