@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '^', '[', ']'};
+const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']'};
 
 enum class TokenType {
     SPECIAL_CHAR, // std::string

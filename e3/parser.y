@@ -46,11 +46,12 @@ void yyerror (const char *msg);
 %token<valor_lexico> TK_LIT_CHAR
 %token<valor_lexico> TK_IDENTIFICADOR
 %token<valor_lexico> TK_ERRO
-%token<valor_lexico> '!' '-' '*' '/' '%' '+' '<' '>'
+%token<valor_lexico> '!' '-' '*' '/' '%' '+' '<' '>' '=' '^'
 
 %type<valor_lexico> programa
 %type<valor_lexico> lista_elem
 %type<valor_lexico> var_global
+%type<valor_lexico> lista_id_var_global
 %type<valor_lexico> id_var_global
 %type<valor_lexico> lista_dimensoes
 %type<valor_lexico> funcao
@@ -100,10 +101,10 @@ lista_elem: var_global {$$ = nullptr;}
           | funcao lista_elem {$$ = $1; $$->add_child($2);};
 
 /* Definição de variáveis globais dos tipos primitivos */
-var_global: tipo_primitivo lista_id_var_global ';';
+var_global: tipo_primitivo lista_id_var_global ';' {$$ = nullptr;};
 
-lista_id_var_global: id_var_global
-                   | lista_id_var_global ',' id_var_global;
+lista_id_var_global: id_var_global {$$ = nullptr;}
+                   | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
 id_var_global: TK_IDENTIFICADOR {$$=nullptr; delete $1;}
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' {$$=nullptr; delete $1;};
@@ -114,9 +115,9 @@ lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao {$$ = $2; $$->add_child($6);};
 
-lista_parametros: %empty
-                | parametro
-                | lista_parametros ',' parametro;
+lista_parametros: %empty {$$ = nullptr;}
+                | parametro {$$ = nullptr;}
+                | lista_parametros ',' parametro {$$ = nullptr;};
 
 parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
 
@@ -124,6 +125,7 @@ corpo_funcao: bloco_comandos {$$ = $1;};
 
 /* Bloco de comandos */
 bloco_comandos: '{' lista_comandos '}' {$$ = $2;}
+              /* TODO: verificar se temos que adicionar um filho em caso de bloco vazio */
               | '{' '}' {$$ = nullptr;};
 
 lista_comandos: comando_simples ';' {$$ = $1;}
@@ -134,58 +136,65 @@ comando_simples: var_local {$$ = $1;}
                | con_fluxo {$$ = $1;}
                | op_retorno {$$ = $1;}
                | cham_funcao {$$ = $1;}
+               /* TODO: entender a parte do bloco de comandos em comandos simples */
                | bloco_comandos {$$ = $1;};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
-var_local: TK_PR_INT lista_var_local_int
-         | TK_PR_FLOAT lista_var_local_float
-         | TK_PR_BOOL lista_var_local_bool
-         | TK_PR_CHAR lista_var_local_char;
+var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
+         | TK_PR_FLOAT lista_var_local_float {$$ = $2;}
+         | TK_PR_BOOL lista_var_local_bool {$$ = $2;}
+         | TK_PR_CHAR lista_var_local_char {$$ = $2;};
 
 /* inteiro */
-lista_var_local_int: var_local_int
-                   | lista_var_local_int ',' var_local_int;
+lista_var_local_int: var_local_int {$$ = $1;}
+                   | var_local_int ',' lista_var_local_int {$$ = $1; $$->add_child($3);};
 
-var_local_int: TK_IDENTIFICADOR
-             | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT;
+var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+             | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* ponto flutuante */
-lista_var_local_float: var_local_float
-                     | lista_var_local_float ',' var_local_float;
+lista_var_local_float: var_local_float {$$ = $1;}
+                     | lista_var_local_float ',' var_local_float {$$ = $1; $$->add_child($3);};
 
-var_local_float: TK_IDENTIFICADOR
-               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT;
+var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* booleano */
-lista_var_local_bool: var_local_bool
-                    | lista_var_local_bool ',' var_local_bool;
+lista_var_local_bool: var_local_bool {$$ = $1;}
+                    | lista_var_local_bool ',' var_local_bool {$$ = $1; $$->add_child($3);};
 
-var_local_bool: TK_IDENTIFICADOR
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE;
+var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE {$$ = $2; $$->add_child($1); $$->add_child($3);}
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* caracter */
-lista_var_local_char: var_local_char
-                    | lista_var_local_char ',' var_local_char;
+lista_var_local_char: var_local_char {$$ = $1;}
+                    | lista_var_local_char ',' var_local_char {$$ = $1; $$->add_child($3);};
 
-var_local_char: TK_IDENTIFICADOR
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR;
+var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* Comando de Atribuição */
-atribuicao: identificador '=' expressao_7;
+atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
-identificador: TK_IDENTIFICADOR
-             | TK_IDENTIFICADOR '[' lista_indices ']';
+identificador: TK_IDENTIFICADOR {$$ = $1;}
+             | TK_IDENTIFICADOR '[' lista_indices ']' {
+                $$ = new Node($1->lex_val.line_no, TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
+                $$->add_child($1);
+                $$->add_child($3);
+             };
 
-lista_indices: expressao_7
-             | lista_indices '^' expressao_7;
+/* TODO: ver qual opção de arvore devemos fazer (com filho vazio ou sem filho vazio) */
+lista_indices: expressao_7 {$$ = $1;}
+             | lista_indices '^' expressao_7 {$$ = $2; $$->add_child($3); $$->add_child($1);};
 
 /* Chamada de função */
-cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')';
+cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->add_child($3);};
 
-lista_argumentos: %empty
-                | expressao_7
-                | lista_argumentos ',' expressao_7;
+/* TODO: Recursão a esquerda ou a direita? */
+lista_argumentos: %empty {$$ = nullptr;}
+                | expressao_7 {$$ = $1;}
+                | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};
 
 /* Comando de retorno */
 op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);};
@@ -204,29 +213,29 @@ expressao_6: expressao_5 { $$ = $1; }
            | expressao_6 TK_OC_AND expressao_5 { $$ = $2; $$->add_child($1); $$->add_child($3); };
 
 expressao_5: expressao_4 { $$ = $1; }
-           | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $2->add_child($1); $2->add_child($3); };
+           | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3); };
 
 expressao_4: expressao_3 { $$ = $1; }
-           | expressao_4 '<' expressao_3 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_4 '>' expressao_3 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $2->add_child($1); $2->add_child($3); };
+           | expressao_4 '<' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_4 '>' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3); };
 
 
 expressao_3: expressao_2 { $$ = $1; }
-           | expressao_3 '+' expressao_2 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_3 '-' expressao_2 { $$ = $2; $2->add_child($1); $2->add_child($3); };
+           | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3); };
 
 expressao_2: expressao_1
-           | expressao_2 '*' expressao_1 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_2 '/' expressao_1 { $$ = $2; $2->add_child($1); $2->add_child($3); }
-           | expressao_2 '%' expressao_1 { $$ = $2; $2->add_child($1); $2->add_child($3); };
+           | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3); }
+           | expressao_2 '%' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3); };
 
 expressao_1: operando { $$ = $1; }
            | '(' expressao_7 ')' { $$ = $2; }
-           | '-' expressao_1 { $$ = $1; $1->add_child($2);}
-           | '!' expressao_1 { $$ = $1; $1->add_child($2);} ;
+           | '-' expressao_1 { $$ = $1; $$->add_child($2);}
+           | '!' expressao_1 { $$ = $1; $$->add_child($2);} ;
 
 operando: identificador { $$ = $1; }
         | literal { $$ = $1; }
@@ -239,10 +248,10 @@ literal: TK_LIT_INT { $$ = $1; }
        | TK_LIT_TRUE { $$ = $1; }
        | TK_LIT_FALSE { $$ = $1; };
 
-tipo_primitivo: TK_PR_INT { $$ = $1; }
-              | TK_PR_FLOAT { $$ = $1; }
-              | TK_PR_CHAR { $$ = $1; }
-              | TK_PR_BOOL { $$ = $1; };
+tipo_primitivo: TK_PR_INT { $$ = nullptr; }
+              | TK_PR_FLOAT { $$ = nullptr; }
+              | TK_PR_CHAR { $$ = nullptr; }
+              | TK_PR_BOOL { $$ = nullptr; };
 
 
 
