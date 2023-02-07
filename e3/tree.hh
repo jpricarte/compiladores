@@ -27,15 +27,16 @@ struct LexicalVal {
 
 struct Node {
     LexicalVal lex_val;
-    std::vector<std::unique_ptr<Node>> children;
+    std::vector<std::shared_ptr<Node>> children;
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
 
     // Save child in children vector, using smart pointer
     void add_child(Node* child);
-    // Return True if is a useless token (such as '{' or "then")
-    bool is_useless();
+
+    inline int get_line_no() { return this->lex_val.line_no; }
+    inline TokenVal get_token_val() { return this->lex_val.token_val; }
 };
 
-typedef std::unique_ptr<Node> Node_p;
+typedef std::shared_ptr<Node> Node_p;

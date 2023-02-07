@@ -179,7 +179,7 @@ atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_c
 
 identificador: TK_IDENTIFICADOR {$$ = $1;}
              | TK_IDENTIFICADOR '[' lista_indices ']' {
-                $$ = new Node($1->lex_val.line_no, TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
+                $$ = new Node($1->get_line_no(), TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
                 $$->add_child($1);
                 $$->add_child($3);
              };
@@ -201,7 +201,13 @@ op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);};
 
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);}
-         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6); $$->add_child($8);}
+         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
+         {
+            $$ = $1; 
+            $$->add_child($3); 
+            $$->add_child($6); 
+            $$->add_child($8);
+         }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
