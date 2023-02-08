@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']'};
+const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']', };
 
 enum class TokenType {
     SPECIAL_CHAR, // char
@@ -31,7 +31,7 @@ struct Node {
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
-    inline ~Node() { std::clog << "deleting " << this->to_string() << std::endl;};
+    ~Node();
 
     // Save child in children vector, using smart pointer
     void add_child(Node* child);

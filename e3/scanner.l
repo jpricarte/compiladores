@@ -141,7 +141,9 @@ identificador	[[:alpha:]]+
 	return TK_LIT_FLOAT;
 }
 {literal_char} {
-    yylval.valor_lexico = new Node(yylineno, TokenType::LIT_CHAR, TokenVal(yytext[0]));
+    std::string char_dec(yytext);
+    std::erase(char_dec, '\'');
+    yylval.valor_lexico = new Node(yylineno, TokenType::LIT_CHAR, TokenVal(char_dec[0]));
 	return TK_LIT_CHAR;
 }
  /* Caracteres especiais, retornam o próprio código ASCII */

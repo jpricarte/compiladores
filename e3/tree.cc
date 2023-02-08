@@ -17,6 +17,10 @@ Node::Node(int line_no, TokenType token_type, TokenVal token_val) {
         clog << this->to_string() << endl;
 }
 
+Node::~Node() { 
+    std::clog << "deleting " << this->to_string() << " from line " << this->get_line_no() << std::endl;
+}
+
 void Node::add_child(Node* child) {
     if (child != nullptr) {
         this->children.push_back(Node_p(child));
@@ -40,7 +44,7 @@ string Node::to_string() {
         case TokenType::LIT_FLOAT:
             return std::to_string(get<float>(this->lex_val.token_val));
         case TokenType::LIT_CHAR:
-            return std::to_string(static_cast<char>(get<char>(this->lex_val.token_val)));
+            return std::string(&get<char>(this->lex_val.token_val), 1);
         case TokenType::LIT_BOOL:
             return std::to_string(get<bool>(this->lex_val.token_val));
         default:

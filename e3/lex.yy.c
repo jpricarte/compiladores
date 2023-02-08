@@ -1075,14 +1075,16 @@ case 32:
 YY_RULE_SETUP
 #line 144 "scanner.l"
 {
-    yylval.valor_lexico = new Node(yylineno, TokenType::LIT_CHAR, TokenVal(yytext[0]));
+    std::string char_dec(yytext);
+    std::erase(char_dec, '\'');
+    yylval.valor_lexico = new Node(yylineno, TokenType::LIT_CHAR, TokenVal(char_dec[0]));
 	return TK_LIT_CHAR;
 }
 	YY_BREAK
 /* Caracteres especiais, retornam o próprio código ASCII */
 case 33:
 YY_RULE_SETUP
-#line 149 "scanner.l"
+#line 151 "scanner.l"
 {
     yylval.valor_lexico = nullptr;
     // Ignora caracteres que não irão para a arvore sintática
@@ -1095,15 +1097,15 @@ YY_RULE_SETUP
 /* Caso não encaixe em nenhum padrão acima, retorna um erro com uma mensagem */
 case 34:
 YY_RULE_SETUP
-#line 159 "scanner.l"
+#line 161 "scanner.l"
 {return TK_ERRO;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 161 "scanner.l"
+#line 163 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1106 "lex.yy.c"
+#line 1108 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 	yyterminate();
@@ -2121,6 +2123,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 161 "scanner.l"
+#line 163 "scanner.l"
 
 

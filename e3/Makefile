@@ -1,6 +1,6 @@
 ETAPA=etapa3
 FLAGS=-Wall
-COMP=g++ --std=c++17 ${FLAGS}
+COMP=g++ --std=c++20 ${FLAGS}
 
 all: reset parser scanner make_obj
 	${COMP} *.o -o ${ETAPA}

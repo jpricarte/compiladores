@@ -23,7 +23,7 @@ int foo (int a, float b) {
     {
         var[1^4*2] = 6 * (2+7) != 5;
         bool vg <= true, vh, vi <= false;
-        char vj <= 'a', vk, vl <= ' ';
+        char vj <= 'a', vk, vl <= '';
         return 0;        
     };
 }
