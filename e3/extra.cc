@@ -4,16 +4,24 @@
 
 extern int yylineno;
 
+void print_arvore(std::shared_ptr<Node> arvore);
+
 int get_line_number() {
 	return yylineno;
 }
 
 void exporta(void* arvore) {
-	Node* arv = (Node*) arvore;
-	std::cout << arvore << " [label=\"" << " " << "\"]" << std::endl;
+	auto arv = std::shared_ptr<Node>((Node*) arvore);
+	print_arvore(arv);
+}
+
+void print_arvore(std::shared_ptr<Node> arvore) {
+	std::cout << arvore << " [label=\"" << arvore->to_string() << "\"]" << std::endl;
 	
-	for (auto child : arv->children) {
-		
+	// erro no parse: shared_ptr<Node> -> void*
+	for (auto child : arvore->children) {
+		std::cout << arvore << "," << child << std::endl;
+		print_arvore(child);
 	}
 }
 

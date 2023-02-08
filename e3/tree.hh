@@ -36,6 +36,8 @@ struct Node {
     void add_child(Node* child);
     void add_null_child();
 
+    std::string to_string();
+
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
 };

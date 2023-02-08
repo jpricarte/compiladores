@@ -1,8 +1,10 @@
 #include <iostream>
+#include <string>
 #include <algorithm>
 #include "tree.hh"
 
 using namespace std;
+
 
 Node::Node(LexicalVal lex_val) : lex_val(lex_val) {}
 
@@ -18,4 +20,24 @@ void Node::add_child(Node* child) {
 
 void Node::add_null_child() {
     this->children.push_back(nullptr);
+}
+
+string Node::to_string() {
+    switch (this->lex_val.token_type) {
+        case TokenType::SPECIAL_CHAR:
+        case TokenType::RESERVED_WORD:
+        case TokenType::COMPOSED_OPERATOR:
+        case TokenType::IDENTIFIER:
+            return get<string>(this->lex_val.token_val);            
+        case TokenType::LIT_INT:
+            return std::to_string(get<int>(this->lex_val.token_val));
+        case TokenType::LIT_FLOAT:
+            return std::to_string(get<float>(this->lex_val.token_val));
+        case TokenType::LIT_CHAR:
+            return std::to_string(get<char>(this->lex_val.token_val));
+        case TokenType::LIT_BOOL:
+            return std::to_string(get<bool>(this->lex_val.token_val));
+        default:
+            return "";
+    }
 }

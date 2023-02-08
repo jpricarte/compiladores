@@ -50,6 +50,7 @@ void yyerror (const char *msg);
 
 %type<valor_lexico> programa
 %type<valor_lexico> lista_elem
+%type<valor_lexico> elemento
 %type<valor_lexico> var_global
 %type<valor_lexico> lista_id_var_global
 %type<valor_lexico> id_var_global
@@ -92,13 +93,13 @@ void yyerror (const char *msg);
 
 %%
 
-programa: lista_elem {$$ = $1; arvore = $$;}
-        | %empty {$$ = nullptr; arvore = $$;};
+programa: lista_elem {$$ = $1; arvore = $$;};
 
-lista_elem: var_global {$$ = nullptr;}
-	      | funcao {$$ = $1;}
-	      | var_global lista_elem {$$ = $2;}
-          | funcao lista_elem {$$ = $1; $$->add_child($2);};
+lista_elem: %empty {$$ = nullptr;}
+          | elemento lista_elem {$$ = $1; $$->add_child($2);};
+
+elemento: var_global {$$ = $1;}
+        | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';' {$$ = nullptr;};
@@ -130,11 +131,9 @@ parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
 corpo_funcao: bloco_comandos {$$ = $1;};
 
 /* Bloco de comandos */
-bloco_comandos: '{' lista_comandos '}' {$$ = $2;}
-              /* TODO: verificar se temos que adicionar um filho em caso de bloco vazio */
-              | '{' '}' {$$ = nullptr;};
+bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
 
-lista_comandos: comando_simples ';' {$$ = $1;}
+lista_comandos: %empty {$$ = nullptr;}
               | comando_simples lista_comandos ';'  {$$ = $1; $$->add_child($2);};
 
 comando_simples: var_local {$$ = $1;}
@@ -142,7 +141,6 @@ comando_simples: var_local {$$ = $1;}
                | con_fluxo {$$ = $1;}
                | op_retorno {$$ = $1;}
                | cham_funcao {$$ = $1;}
-               /* TODO: entender a parte do bloco de comandos em comandos simples */
                | bloco_comandos {$$ = $1;};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
@@ -190,14 +188,12 @@ identificador: TK_IDENTIFICADOR {$$ = $1;}
                 $$->add_child($3);
              };
 
-/* TODO: ver qual opção de arvore devemos fazer (com filho vazio ou sem filho vazio) */
 lista_indices: expressao_7 {$$ = $1;}
              | lista_indices '^' expressao_7 {$$ = $2; $$->add_child($3); $$->add_child($1);};
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->add_child($3);};
 
-/* TODO: Recursão a esquerda ou a direita? */
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}
                 | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};
