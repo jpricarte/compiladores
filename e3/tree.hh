@@ -7,7 +7,7 @@
 const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']'};
 
 enum class TokenType {
-    SPECIAL_CHAR, // std::string
+    SPECIAL_CHAR, // char
     RESERVED_WORD, // std::string
     COMPOSED_OPERATOR, // std::string
     IDENTIFIER, // std::string

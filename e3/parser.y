@@ -96,7 +96,14 @@ void yyerror (const char *msg);
 programa: lista_elem {$$ = $1; arvore = $$;};
 
 lista_elem: %empty {$$ = nullptr;}
-          | elemento lista_elem {$$ = $1; $$->add_child($2);};
+          | elemento lista_elem {
+            if ($$!=nullptr) {
+                $$ = $1; 
+                $$->add_child($2);
+            } else {
+                $$ = $2;
+            }
+        };
 
 elemento: var_global {$$ = $1;}
         | funcao {$$ = $1;};
@@ -134,7 +141,7 @@ corpo_funcao: bloco_comandos {$$ = $1;};
 bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
 
 lista_comandos: %empty {$$ = nullptr;}
-              | comando_simples lista_comandos ';'  {$$ = $1; $$->add_child($2);};
+              | comando_simples ';' lista_comandos {$$ = $1; $$->add_child($3);};
 
 comando_simples: var_local {$$ = $1;}
                | atribuicao {$$ = $1;}
@@ -151,21 +158,41 @@ var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
 
 /* inteiro */
 lista_var_local_int: var_local_int {$$ = $1;}
-                   | var_local_int ',' lista_var_local_int {$$ = $1; $$->add_child($3);};
+                   | lista_var_local_int ',' var_local_int  {
+                            if ($1 != nullptr) {
+                                $$ = $1; 
+                                $$->add_child($3);
+                            } else {
+                                $$ = $3;
+                            }
+                        };
 
 var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* ponto flutuante */
 lista_var_local_float: var_local_float {$$ = $1;}
-                     | lista_var_local_float ',' var_local_float {$$ = $1; $$->add_child($3);};
+                     | lista_var_local_float ',' var_local_float {
+                            if ($1 != nullptr) {
+                                $$ = $1; 
+                                $$->add_child($3);
+                            } else {
+                                    $$ = $3;
+                            }
+                        };
 
 var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
                | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* booleano */
 lista_var_local_bool: var_local_bool {$$ = $1;}
-                    | lista_var_local_bool ',' var_local_bool {$$ = $1; $$->add_child($3);};
+                    | lista_var_local_bool ',' var_local_bool {
+                    if ($1 != nullptr) {
+                        $$ = $1; 
+                        $$->add_child($3);
+                   } else {
+                        $$ = $3;
+                   }};
 
 var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE {$$ = $2; $$->add_child($1); $$->add_child($3);}
@@ -173,7 +200,13 @@ var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
 
 /* caracter */
 lista_var_local_char: var_local_char {$$ = $1;}
-                    | lista_var_local_char ',' var_local_char {$$ = $1; $$->add_child($3);};
+                    | lista_var_local_char ',' var_local_char {
+                    if ($1 != nullptr) {
+                        $$ = $1; 
+                        $$->add_child($3);
+                   } else {
+                        $$ = $3;
+                   }};
 
 var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};

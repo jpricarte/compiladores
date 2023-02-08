@@ -17,7 +17,7 @@ bool bar() {
 
 int foo (int a, float b) {
     int v, va <= 42, vb;
-    float vc <= 3.14, vd <= 1.4E-10, ve <= 9.8e+4, vf;
+    float vh, vc <= 3.14, vd <= 1.4E-10, ve <= 9.8e+4, vf;
     va = true;
     bar();
     {
