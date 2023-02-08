@@ -4,6 +4,7 @@
 
 extern int yylineno;
 bool debug = true;
+bool output = false;
 
 void print_arvore(std::shared_ptr<Node> arvore);
 
@@ -27,5 +28,4 @@ void print_arvore(std::shared_ptr<Node> arvore) {
 }
 
 void libera(void* arvore) {
-	//delete (Node*) arvore;
 }

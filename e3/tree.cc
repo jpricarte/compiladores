@@ -8,13 +8,13 @@ extern bool debug;
 
 Node::Node(LexicalVal lex_val) : lex_val(lex_val) {
     if (debug)
-        cout << this->to_string() << endl;
+        clog << this->to_string() << endl;
 }
 
 Node::Node(int line_no, TokenType token_type, TokenVal token_val) {
     this->lex_val = LexicalVal{line_no, token_type, token_val};
     if (debug)
-        cout << this->to_string() << endl;
+        clog << this->to_string() << endl;
 }
 
 void Node::add_child(Node* child) {

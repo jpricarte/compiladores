@@ -1603,7 +1603,7 @@ yyreduce:
 
   case 13: /* lista_dimensoes: lista_dimensoes '^' TK_LIT_INT  */
 #line 121 "parser.y"
-                                                {(yyval.valor_lexico)=nullptr; delete (yyvsp[0].valor_lexico);}
+                                                {(yyval.valor_lexico)=nullptr; delete (yyvsp[-1].valor_lexico); delete (yyvsp[0].valor_lexico);}
 #line 1608 "parser.tab.c"
     break;
 
@@ -1801,9 +1801,9 @@ yyreduce:
                     if ((yyvsp[-2].valor_lexico) != nullptr) {
                         (yyval.valor_lexico) = (yyvsp[-2].valor_lexico); 
                         (yyval.valor_lexico)->add_child((yyvsp[0].valor_lexico));
-                   } else {
+                    } else {
                         (yyval.valor_lexico) = (yyvsp[0].valor_lexico);
-                   }}
+                    }}
 #line 1808 "parser.tab.c"
     break;
 
@@ -1837,9 +1837,9 @@ yyreduce:
                     if ((yyvsp[-2].valor_lexico) != nullptr) {
                         (yyval.valor_lexico) = (yyvsp[-2].valor_lexico); 
                         (yyval.valor_lexico)->add_child((yyvsp[0].valor_lexico));
-                   } else {
+                    } else {
                         (yyval.valor_lexico) = (yyvsp[0].valor_lexico);
-                   }}
+                    }}
 #line 1844 "parser.tab.c"
     break;
 

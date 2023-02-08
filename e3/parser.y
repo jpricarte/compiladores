@@ -118,7 +118,7 @@ id_var_global: TK_IDENTIFICADOR {$$=nullptr; delete $1;}
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' {$$=nullptr; delete $1;};
 
 lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
-               | lista_dimensoes '^' TK_LIT_INT {$$=nullptr; delete $3;};
+               | lista_dimensoes '^' TK_LIT_INT {$$=nullptr; delete $2; delete $3;};
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao {
@@ -190,9 +190,9 @@ lista_var_local_bool: var_local_bool {$$ = $1;}
                     if ($1 != nullptr) {
                         $$ = $1; 
                         $$->add_child($3);
-                   } else {
+                    } else {
                         $$ = $3;
-                   }};
+                    }};
 
 var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE {$$ = $2; $$->add_child($1); $$->add_child($3);}
@@ -204,9 +204,9 @@ lista_var_local_char: var_local_char {$$ = $1;}
                     if ($1 != nullptr) {
                         $$ = $1; 
                         $$->add_child($3);
-                   } else {
+                    } else {
                         $$ = $3;
-                   }};
+                    }};
 
 var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};

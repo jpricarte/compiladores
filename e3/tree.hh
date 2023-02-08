@@ -31,6 +31,7 @@ struct Node {
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
+    inline ~Node() { std::clog << "deleting " << this->to_string() << std::endl;};
 
     // Save child in children vector, using smart pointer
     void add_child(Node* child);
