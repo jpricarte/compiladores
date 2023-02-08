@@ -34,6 +34,7 @@ struct Node {
 
     // Save child in children vector, using smart pointer
     void add_child(Node* child);
+    void add_null_child();
 
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }

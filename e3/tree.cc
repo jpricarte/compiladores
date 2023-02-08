@@ -15,3 +15,7 @@ void Node::add_child(Node* child) {
         this->children.push_back(Node_p(child));
     }
 }
+
+void Node::add_null_child() {
+    this->children.push_back(nullptr);
+}
