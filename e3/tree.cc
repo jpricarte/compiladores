@@ -36,7 +36,7 @@ void Node::add_null_child() {
 string Node::to_string() {
     switch (this->lex_val.token_type) {
         case TokenType::SPECIAL_CHAR:
-            return std::to_string(get<char>(this->lex_val.token_val));
+            return std::string(&get<char>(this->lex_val.token_val), 1);
         case TokenType::RESERVED_WORD:
         case TokenType::COMPOSED_OPERATOR:
             return get<string>(this->lex_val.token_val); 

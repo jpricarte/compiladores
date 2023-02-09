@@ -178,7 +178,7 @@ lista_var_local_int: %empty {$$ = nullptr;}
                     };
 
 var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-             | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT {$$ = $2; $$->add_child($1); $$->add_child($3);};
+             | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* ponto flutuante */
 lista_var_local_float: %empty {$$ = nullptr;}
@@ -202,7 +202,7 @@ lista_var_local_float: %empty {$$ = nullptr;}
                     };
 
 var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT {$$ = $2; $$->add_child($1); $$->add_child($3);};
+               | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* booleano */
 lista_var_local_bool: %empty {$$ = nullptr;}
@@ -226,9 +226,7 @@ lista_var_local_bool: %empty {$$ = nullptr;}
                     };
 
 var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE {$$ = $2; $$->add_child($1); $$->add_child($3);}
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE {$$ = $2; $$->add_child($1); $$->add_child($3);};
-
+              | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 /* caracter */
 lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char

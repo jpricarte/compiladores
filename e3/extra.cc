@@ -12,8 +12,10 @@ int get_line_number() {
 }
 
 void exporta(void* arvore) {
-	auto arv = std::shared_ptr<Node>((Node*) arvore);
-	print_arvore(arv);
+    if (arvore != nullptr) {
+        auto arv = std::shared_ptr<Node>((Node*) arvore);
+        print_arvore(arv);
+    }
 }
 
 void print_arvore(std::shared_ptr<Node> arvore) {
