@@ -157,56 +157,98 @@ var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
          | TK_PR_CHAR lista_var_local_char {$$ = $2;};
 
 /* inteiro */
-lista_var_local_int: var_local_int {$$ = $1;}
-                   | lista_var_local_int ',' var_local_int  {
-                            if ($1 != nullptr) {
-                                $$ = $1; 
-                                $$->add_child($3);
-                            } else {
-                                $$ = $3;
-                            }
-                        };
+lista_var_local_int: %empty {$$ = nullptr;}
+                   | var_local_int lista_var_local_int 
+                   {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($2);
+                        } else {
+                            $$ = $2;
+                        }
+                    };
+                   | var_local_int ',' lista_var_local_int 
+                   {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($3);
+                        } else {
+                            $$ = $3;
+                        }
+                    };
 
 var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_INT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* ponto flutuante */
-lista_var_local_float: var_local_float {$$ = $1;}
-                     | lista_var_local_float ',' var_local_float {
-                            if ($1 != nullptr) {
-                                $$ = $1; 
-                                $$->add_child($3);
-                            } else {
-                                    $$ = $3;
-                            }
-                        };
+lista_var_local_float: %empty {$$ = nullptr;}
+                     | var_local_float lista_var_local_float
+                     {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($2);
+                        } else {
+                            $$ = $2;
+                        }
+                    };
+                     | var_local_float ',' lista_var_local_float
+                     {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($3);
+                        } else {
+                            $$ = $3;
+                        }
+                    };
 
 var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
                | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FLOAT {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* booleano */
-lista_var_local_bool: var_local_bool {$$ = $1;}
-                    | lista_var_local_bool ',' var_local_bool {
-                    if ($1 != nullptr) {
-                        $$ = $1; 
-                        $$->add_child($3);
-                    } else {
-                        $$ = $3;
-                    }};
+lista_var_local_bool: %empty {$$ = nullptr;}
+                    | var_local_bool lista_var_local_bool
+                    {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($2);
+                        } else {
+                            $$ = $2;
+                        }
+                    };
+                    | var_local_bool ',' lista_var_local_bool
+                    {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($3);
+                        } else {
+                            $$ = $3;
+                        }
+                    };
 
 var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_TRUE {$$ = $2; $$->add_child($1); $$->add_child($3);}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_FALSE {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* caracter */
-lista_var_local_char: var_local_char {$$ = $1;}
-                    | lista_var_local_char ',' var_local_char {
-                    if ($1 != nullptr) {
-                        $$ = $1; 
-                        $$->add_child($3);
-                    } else {
-                        $$ = $3;
-                    }};
+lista_var_local_char: %empty {$$ = nullptr;}
+                    | var_local_char lista_var_local_char
+                    {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($2);
+                        } else {
+                            $$ = $2;
+                        }
+                    };
+                    | var_local_char ',' lista_var_local_char
+                    {
+                        if ($1 != nullptr) {
+                            $$ = $1; 
+                            $$->add_child($3);
+                        } else {
+                            $$ = $3;
+                        }
+                    };
 
 var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
               | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};
@@ -225,7 +267,7 @@ lista_indices: expressao_7 {$$ = $1;}
              | lista_indices '^' expressao_7 {$$ = $2; $$->add_child($3); $$->add_child($1);};
 
 /* Chamada de função */
-cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->add_child($3);};
+cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($3);};
 
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}

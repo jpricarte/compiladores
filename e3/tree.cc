@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include "tree.hh"
 
@@ -18,7 +19,8 @@ Node::Node(int line_no, TokenType token_type, TokenVal token_val) {
 }
 
 Node::~Node() { 
-    std::clog << "deleting " << this->to_string() << " from line " << this->get_line_no() << std::endl;
+    if (debug)
+        std::clog << "deleting " << this->to_string() << " from line " << this->get_line_no() << std::endl;
 }
 
 void Node::add_child(Node* child) {
@@ -37,8 +39,12 @@ string Node::to_string() {
             return std::to_string(get<char>(this->lex_val.token_val));
         case TokenType::RESERVED_WORD:
         case TokenType::COMPOSED_OPERATOR:
+            return get<string>(this->lex_val.token_val); 
         case TokenType::IDENTIFIER:
-            return get<string>(this->lex_val.token_val);            
+            if (this->is_func_call) {
+                return std::string("call ")+get<string>(this->lex_val.token_val);
+            }
+            else return get<string>(this->lex_val.token_val);            
         case TokenType::LIT_INT:
             return std::to_string(get<int>(this->lex_val.token_val));
         case TokenType::LIT_FLOAT:

@@ -3,8 +3,7 @@
 /*  FUNCOES AUXILIARES  */
 
 extern int yylineno;
-bool debug = true;
-bool output = false;
+bool debug = false;
 
 void print_arvore(std::shared_ptr<Node> arvore);
 

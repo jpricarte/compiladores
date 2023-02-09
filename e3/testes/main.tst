@@ -17,13 +17,13 @@ bool bar() {
 
 int foo (int a, float b) {
     int v, va <= 42, vb;
-    float vh, vc <= 3.14, vd <= 1.4E-10, ve <= 9.8e+4, vf;
+    float vh, vc <= 3.14, vd <= -1.4E-10, ve <= 9.8e+4, vf;
     va = true;
     bar();
     {
         var[1^4*2] = 6 * (2+7) != 5;
         bool vg <= true, vh, vi <= false;
-        char vj <= 'a', vk, vl <= '';
+        char vj <= 'a', vk, vl <= ' ';
         return 0;        
     };
 }

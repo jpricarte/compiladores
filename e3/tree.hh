@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']', };
+const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']'};
 
 enum class TokenType {
     SPECIAL_CHAR, // char
@@ -28,6 +28,7 @@ struct LexicalVal {
 struct Node {
     LexicalVal lex_val;
     std::vector<std::shared_ptr<Node>> children;
+    bool is_func_call = false;
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
@@ -41,6 +42,8 @@ struct Node {
 
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
+    inline void set_is_func_call(bool b) { this->is_func_call = b; }
+
 };
 
 typedef std::shared_ptr<Node> Node_p;
