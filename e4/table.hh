@@ -35,9 +35,15 @@ struct SymbolTableStack {;
      */
 public :
     // funções para manipular stack;
-    void push();
-    void pop(); // deleta tabela de cima
-    symbol_table* top(); // retorna a table mais de cima
+    inline void push(symbol_table& st) {
+        this->stack.push_back(st);
+    };
+    inline void pop() {
+        this->stack.pop_back();
+    }; // deleta tabela de cima
+    inline symbol_table& top() {
+        return this->stack.back();
+    }; // retorna a table mais de cima
     int findSymbolTable(int key); // retorna indice na stack ou -1
 private:
     std::vector<symbol_table> stack;
