@@ -123,10 +123,7 @@ lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao {
     $$ = $2; 
-    if ($6 != nullptr) 
-        $$->add_child($6);
-    else
-        $$->add_null_child();
+    $$->add_child($6);
     };
 
 lista_parametros: %empty {$$ = nullptr;}

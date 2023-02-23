@@ -29,10 +29,6 @@ void Node::add_child(Node* child) {
     }
 }
 
-void Node::add_null_child() {
-    this->children.push_back(nullptr);
-}
-
 string Node::to_string() {
     switch (this->lex_val.token_type) {
         case TokenType::SPECIAL_CHAR:
