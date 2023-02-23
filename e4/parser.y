@@ -331,11 +331,11 @@ operando: identificador { $$ = $1; }
         | cham_funcao { $$ = $1; };
 
 /* regras para deixar o parser menos verboso */
-literal: TK_LIT_INT { $$ = $1; }
-       | TK_LIT_FLOAT { $$ = $1; }
-       | TK_LIT_CHAR { $$ = $1; }
-       | TK_LIT_TRUE { $$ = $1; }
-       | TK_LIT_FALSE { $$ = $1; };
+literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
+       | TK_LIT_FLOAT { $$ = $1; $$->set_node_type(Type::FLOATING); }
+       | TK_LIT_CHAR { $$ = $1; $$->set_node_type(Type::CHARACTER); }
+       | TK_LIT_TRUE { $$ = $1; $$->set_node_type(Type::BOOLEAN); }
+       | TK_LIT_FALSE { $$ = $1; $$->set_node_type(Type::BOOLEAN); };
 
 tipo_primitivo: TK_PR_INT { $$ = nullptr; }
               | TK_PR_FLOAT { $$ = nullptr; }

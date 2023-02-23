@@ -51,7 +51,7 @@ struct Node {
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
     inline void set_is_func_call(bool b) { this->is_func_call = b; }
-    inline void set_type(Type t) { this->type = t; }
+    inline void set_node_type(Type t) { this->node_type = t; }
 
 };
 

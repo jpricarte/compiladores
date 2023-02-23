@@ -2151,31 +2151,31 @@ yyreduce:
 
   case 92: /* literal: TK_LIT_INT  */
 #line 334 "parser.y"
-                    { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); }
+                    { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::INTEGER); }
 #line 2156 "parser.tab.c"
     break;
 
   case 93: /* literal: TK_LIT_FLOAT  */
 #line 335 "parser.y"
-                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); }
+                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::FLOATING); }
 #line 2162 "parser.tab.c"
     break;
 
   case 94: /* literal: TK_LIT_CHAR  */
 #line 336 "parser.y"
-                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); }
+                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::CHARACTER); }
 #line 2168 "parser.tab.c"
     break;
 
   case 95: /* literal: TK_LIT_TRUE  */
 #line 337 "parser.y"
-                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); }
+                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN); }
 #line 2174 "parser.tab.c"
     break;
 
   case 96: /* literal: TK_LIT_FALSE  */
 #line 338 "parser.y"
-                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); }
+                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN); }
 #line 2180 "parser.tab.c"
     break;
 
