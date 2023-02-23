@@ -18,7 +18,7 @@ struct Symbol {
     Node_p assoc_node;
 };
 
-typedef std::map<int, Symbol&> symbol_table;
+typedef std::map<TokenVal, Symbol&> symbol_table;
 
 // todo Type type_infer (symb_1, symb_2)
 
