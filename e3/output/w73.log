@@ -1,0 +1,23 @@
+0x55fbfebbcfc0 [label="f"]
+0x55fbfebbcfc0,0x55fbfebbd1d0
+0x55fbfebbd1d0 [label="="]
+0x55fbfebbd1d0,0x55fbfebbd0e0
+0x55fbfebbd0e0 [label="[]"]
+0x55fbfebbd0e0,0x55fbfebbd020
+0x55fbfebbd020 [label="c"]
+0x55fbfebbd0e0,0x55fbfebbd080
+0x55fbfebbd080 [label="5"]
+0x55fbfebbd1d0,0x55fbfebbd550
+0x55fbfebbd550 [label="[]"]
+0x55fbfebbd550,0x55fbfebbd230
+0x55fbfebbd230 [label="a"]
+0x55fbfebbd550,0x55fbfebbd3b0
+0x55fbfebbd3b0 [label="+"]
+0x55fbfebbd3b0,0x55fbfebbd2f0
+0x55fbfebbd2f0 [label="*"]
+0x55fbfebbd2f0,0x55fbfebbd290
+0x55fbfebbd290 [label="2"]
+0x55fbfebbd2f0,0x55fbfebbd350
+0x55fbfebbd350 [label="c"]
+0x55fbfebbd3b0,0x55fbfebbd480
+0x55fbfebbd480 [label="k"]

@@ -138,7 +138,13 @@ corpo_funcao: bloco_comandos {$$ = $1;};
 bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
 
 lista_comandos: %empty {$$ = nullptr;}
-              | comando_simples ';' lista_comandos {$$ = $1; $$->add_child($3);};
+              | comando_simples ';' lista_comandos {
+                if ($1 != nullptr) {
+                    $$ = $1; 
+                    $$->add_child($3);
+                } else {
+                    $$ = $3;
+                }};
 
 comando_simples: var_local {$$ = $1;}
                | atribuicao {$$ = $1;}
