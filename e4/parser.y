@@ -1,3 +1,8 @@
+/*
+ *	TODO definir/inferir tipo em todas operações
+ */
+
+
 %{
 #include <iostream>
 #include <memory>
@@ -98,7 +103,7 @@ programa: lista_elem {$$ = $1; arvore = $$;};
 lista_elem: %empty {$$ = nullptr;}
           | elemento lista_elem {
             if ($$!=nullptr) {
-                $$ = $1; 
+                $$ = $1;
                 $$->add_child($2);
             } else {
                 $$ = $2;
@@ -122,11 +127,8 @@ lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao {
-    $$ = $2; 
-    if ($6 != nullptr) 
-        $$->add_child($6);
-    else
-        $$->add_null_child();
+    $$ = $2;
+    $$->add_child($6);
     };
 
 lista_parametros: %empty {$$ = nullptr;}
@@ -141,7 +143,13 @@ corpo_funcao: bloco_comandos {$$ = $1;};
 bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
 
 lista_comandos: %empty {$$ = nullptr;}
-              | comando_simples ';' lista_comandos {$$ = $1; $$->add_child($3);};
+              | comando_simples ';' lista_comandos {
+                if ($1 != nullptr) {
+                    $$ = $1;
+                    $$->add_child($3);
+                } else {
+                    $$ = $3;
+                }};
 
 comando_simples: var_local {$$ = $1;}
                | atribuicao {$$ = $1;}
@@ -158,19 +166,19 @@ var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
 
 /* inteiro */
 lista_var_local_int: %empty {$$ = nullptr;}
-                   | var_local_int lista_var_local_int 
+                   | var_local_int lista_var_local_int
                    {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($2);
                         } else {
                             $$ = $2;
                         }
                     };
-                   | var_local_int ',' lista_var_local_int 
+                   | var_local_int ',' lista_var_local_int
                    {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($3);
                         } else {
                             $$ = $3;
@@ -185,7 +193,7 @@ lista_var_local_float: %empty {$$ = nullptr;}
                      | var_local_float lista_var_local_float
                      {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($2);
                         } else {
                             $$ = $2;
@@ -194,7 +202,7 @@ lista_var_local_float: %empty {$$ = nullptr;}
                      | var_local_float ',' lista_var_local_float
                      {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($3);
                         } else {
                             $$ = $3;
@@ -209,7 +217,7 @@ lista_var_local_bool: %empty {$$ = nullptr;}
                     | var_local_bool lista_var_local_bool
                     {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($2);
                         } else {
                             $$ = $2;
@@ -218,7 +226,7 @@ lista_var_local_bool: %empty {$$ = nullptr;}
                     | var_local_bool ',' lista_var_local_bool
                     {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($3);
                         } else {
                             $$ = $3;
@@ -232,7 +240,7 @@ lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char
                     {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($2);
                         } else {
                             $$ = $2;
@@ -241,7 +249,7 @@ lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char ',' lista_var_local_char
                     {
                         if ($1 != nullptr) {
-                            $$ = $1; 
+                            $$ = $1;
                             $$->add_child($3);
                         } else {
                             $$ = $3;
@@ -276,11 +284,11 @@ op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);};
 
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);}
-         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
+         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos
          {
-            $$ = $1; 
-            $$->add_child($3); 
-            $$->add_child($6); 
+            $$ = $1;
+            $$->add_child($3);
+            $$->add_child($6);
             $$->add_child($8);
          }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);};

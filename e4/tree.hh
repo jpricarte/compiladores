@@ -17,6 +17,13 @@ enum class TokenType {
     LIT_BOOL, // bool
 };
 
+enum class Type {
+    INTEGER,
+    FLOATING,
+    CHARACTER,
+    BOOLEAN
+};
+
 typedef std::variant<std::string, int, float, char, bool> TokenVal;
 
 struct LexicalVal {
@@ -29,6 +36,7 @@ struct Node {
     LexicalVal lex_val;
     std::vector<std::shared_ptr<Node>> children;
     bool is_func_call = false;
+    Type node_type; // todo
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);

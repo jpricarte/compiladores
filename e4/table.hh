@@ -1,5 +1,5 @@
-#include <stack>
 #include <map>
+#include <vector>
 #include "tree.hh"
 
 enum class Kind {
@@ -7,13 +7,6 @@ enum class Kind {
     VARIABLE,
     ARRANGE,
     FUNCTION
-};
-
-enum class Type {
-    INTEGER,
-    FLOATING,
-    CHARACTER,
-    BOOLEAN
 };
 
 struct Symbol {
@@ -24,4 +17,29 @@ struct Symbol {
     Node_p assoc_node;
 };
 
-std::stack<std::map<int, Symbol>> symbol_table_stack;
+typedef std::map<int, Symbol&> symbol_table;
+
+// todo Type type_infer (symb_1, symb_2)
+
+
+Type type_infer (Type symbol_1, Type symbol_2) {
+/*
+ *  Dado dois simbolos, faz inferência e retorna o tipo.
+ */
+}
+
+struct SymbolTableStack {;
+    /*
+     *  - função para buscar simbolo na pilha (getsymboltable): varre a pilha de cima para baixo procurando um simbolo
+     *
+     */
+public :
+    // funções para manipular stack;
+    void push();
+    void pop(); // deleta tabela de cima
+    symbol_table* top(); // retorna a table mais de cima
+    int findSymbolTable(int key); // retorna indice na stack ou -1
+private:
+    std::vector<symbol_table> stack;
+};
+// note https://cplusplus.com/reference/vector/vector/
