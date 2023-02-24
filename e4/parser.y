@@ -277,18 +277,22 @@ lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};
 
 /* Comando de retorno */
-op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);};
+op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
+				       $$->set_node_type($2->get_node_type());};
 
 /* Controle de fluxo */
-con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);}
+con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
+								   $$->set_node_type($3->get_node_type());}
          | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
          {
-            $$ = $1; 
-            $$->add_child($3); 
-            $$->add_child($6); 
+            $$ = $1;
+            $$->add_child($3);
+            $$->add_child($6);
             $$->add_child($8);
+            $$->set_node_type($3->get_node_type());
          }
-         | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);};
+         | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
+         						   $$->set_node_type($3->get_node_type());};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
 
