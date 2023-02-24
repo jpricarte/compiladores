@@ -336,6 +336,7 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                                       };
 
 /* caracter */
+// TODO ERR_CHAR_VECTOR?
 lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char
                     {
@@ -418,7 +419,8 @@ op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
 
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
-								   $$->set_node_type($3->get_node_type());}
+								   $$->set_node_type($3->get_node_type());
+								   if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}}
          | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
          {
             $$ = $1;
@@ -426,56 +428,73 @@ con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->
             $$->add_child($6);
             $$->add_child($8);
             $$->set_node_type($3->get_node_type());
+            if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}
          }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
-         						   $$->set_node_type($3->get_node_type());};
+         						   $$->set_node_type($3->get_node_type());
+         						   if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
 
 expressao_7: expressao_6 { $$ = $1; }
            | expressao_7 TK_OC_OR expressao_6 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
 
 expressao_6: expressao_5 { $$ = $1; }
            | expressao_6 TK_OC_AND expressao_5 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					 $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           					 $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					 if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
 
 
 expressao_5: expressao_4 { $$ = $1; }
            | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
 
 expressao_4: expressao_3 { $$ = $1; }
            | expressao_4 '<' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_4 '>' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
 
 
 expressao_3: expressao_2 { $$ = $1; }
            | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
 
 expressao_2: expressao_1 { $$ = $1; }
            | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
            | expressao_2 '%' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
 
 expressao_1: operando { $$ = $1; }
            | '(' expressao_7 ')' { $$ = $2; }
-           | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); }
-           | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); } ;
+           | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type());
+           		       if ($2->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type());
+           		       if ($2->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}} ;
 
 operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
         | literal { $$ = $1; $$->set_node_type($1->get_node_type()); }
