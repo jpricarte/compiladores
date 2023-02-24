@@ -15,9 +15,9 @@ parser: parser.y
 scanner: scanner.l
 	 flex scanner.l
 
-reset:
+reset: clean
 	rm -f lex.yy.* parser.tab.* ${ETAPA}
 
 clean:
-	rm *.o
+	rm -f *.o
 

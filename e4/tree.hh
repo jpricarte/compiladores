@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TREE_HH
+#define TREE_HH
 #include <vector>
 #include <variant>
 #include <string>
@@ -21,7 +22,8 @@ enum class Type {
     INTEGER,
     FLOATING,
     CHARACTER,
-    BOOLEAN
+    BOOLEAN,
+    TYPE_ERROR
 };
 
 typedef std::variant<std::string, int, float, char, bool> TokenVal;
@@ -52,8 +54,14 @@ struct Node {
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
     inline void set_is_func_call(bool b) { this->is_func_call = b; }
     inline void set_node_type(Type t) { this->node_type = t; }
-    inline void get_node_type(Type t) { return this->node_type; }
+    inline Type get_node_type() { return this->node_type; }
 
 };
 
 typedef std::shared_ptr<Node> Node_p;
+
+/* FUNÇÕES NÃO TIPADAS */
+void print_arvore(std::shared_ptr<Node> arvore);
+
+#endif // TREE_HH
+

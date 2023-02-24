@@ -6,10 +6,13 @@
 %{
 #include <iostream>
 #include <memory>
+#include "tree.hh"
+#include "table.hh"
 extern int get_line_number();
 extern void* arvore;
 int yylex(void);
 void yyerror (const char *msg);
+SymbolTableStack symbol_table_stack{};
 %}
 
 %require "3.0.4"
@@ -99,7 +102,7 @@ void yyerror (const char *msg);
 
 %%
 
-programa: lista_elem {$$ = $1; arvore = $$;};
+programa: { symbol_table_stack.push_new(); } lista_elem {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
 
 lista_elem: %empty {$$ = nullptr;}
           | elemento lista_elem {
@@ -141,7 +144,7 @@ parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
 corpo_funcao: bloco_comandos {$$ = $1;};
 
 /* Bloco de comandos */
-bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
+bloco_comandos: '{' { symbol_table_stack.push_new(); } lista_comandos '}' {$$ = $3; symbol_table_stack.pop(); };
 
 lista_comandos: %empty {$$ = nullptr;}
               | comando_simples ';' lista_comandos {
@@ -152,12 +155,12 @@ lista_comandos: %empty {$$ = nullptr;}
                     $$ = $3;
                 }};
 
-comando_simples: var_local {$$ = $1; $$->set_node_type(get_node_type($1));}
-               | atribuicao {$$ = $1; $$->set_node_type(get_node_type($1));}
-               | con_fluxo {$$ = $1; $$->set_node_type(get_node_type($1));}
-               | op_retorno {$$ = $1; $$->set_node_type(get_node_type($1));}
-               | cham_funcao {$$ = $1; $$->set_node_type(get_node_type($1));}
-               | bloco_comandos {$$ = $1; $$->set_node_type(get_node_type($1));};
+comando_simples: var_local {$$ = $1; $$->set_node_type($1->get_node_type());}
+               | atribuicao {$$ = $1; $$->set_node_type($1->get_node_type());}
+               | con_fluxo {$$ = $1; $$->set_node_type($1->get_node_type());}
+               | op_retorno {$$ = $1; $$->set_node_type($1->get_node_type());}
+               | cham_funcao {$$ = $1; $$->set_node_type($1->get_node_type());}
+               | bloco_comandos {$$ = $1; $$->set_node_type($1->get_node_type());};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
 var_local: TK_PR_INT lista_var_local_int {$$ = $2;
@@ -282,7 +285,7 @@ var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;
 
 /* Comando de Atribuição */
 atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);
-					   $$->set_node_type(get_node_type($1));};
+					   $$->set_node_type($1->get_node_type());};
 
 identificador: TK_IDENTIFICADOR {$$ = $1;}
              | TK_IDENTIFICADOR '[' lista_indices ']' {
@@ -296,7 +299,7 @@ lista_indices: expressao_7 {$$ = $1;}
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($3);
-							$$->set_node_type(get_node_type($1));};
+							$$->set_node_type($1->get_node_type());};
 
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}
@@ -304,70 +307,70 @@ lista_argumentos: %empty {$$ = nullptr;}
 
 /* Comando de retorno */
 op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
-				       $$->set_node_type(get_node_type($2));};
+				       $$->set_node_type($2->get_node_type());};
 
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
-								   $$->set_node_type(get_node_type($3));}
+								   $$->set_node_type($3->get_node_type());}
          | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos
          {
             $$ = $1;
             $$->add_child($3);
             $$->add_child($6);
             $$->add_child($8);
-            $$->set_node_type(get_node_type($3));
+            $$->set_node_type($3->get_node_type());
          }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
-         						   $$->set_node_type(get_node_type($3));};
+         						   $$->set_node_type($3->get_node_type());};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
 
 expressao_7: expressao_6 { $$ = $1; }
            | expressao_7 TK_OC_OR expressao_6 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_6: expressao_5 { $$ = $1; }
            | expressao_6 TK_OC_AND expressao_5 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					 $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           					 $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_5: expressao_4 { $$ = $1; }
            | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_4: expressao_3 { $$ = $1; }
            | expressao_4 '<' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_4 '>' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           					$$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_3: expressao_2 { $$ = $1; }
            | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_2: expressao_1
            | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); }
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_2 '%' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer(get_node_type($1), get_node_type($3))); };
+           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_1: operando { $$ = $1; }
-           | '(' expressao_7 ')' { $$ = $2; $$->set_node_type(get_node_type($2)); }
-           | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type(get_node_type($2)); }
-           | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type(get_node_type($2)); } ;
+           | '(' expressao_7 ')' { $$ = $2; $$->set_node_type($2->get_node_type()); }
+           | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); }
+           | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); } ;
 
-operando: identificador { $$ = $1;  $$->set_node_type(get_node_type($1)); }
-        | literal { $$ = $1; $$->set_node_type(get_node_type($1)); }
-        | cham_funcao { $$ = $1; $$->set_node_type(get_node_type($1)); };
+operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
+        | literal { $$ = $1; $$->set_node_type($1->get_node_type()); }
+        | cham_funcao { $$ = $1; $$->set_node_type($1->get_node_type()); };
 
 /* regras para deixar o parser menos verboso */
 literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
