@@ -4,5 +4,5 @@ int foo() {
     bool z;
     bool j <= (3+5*2)/1 + 2 != 5;
     float k, l <= 3.5e+15;
-    int m <= 4, n;
+    int m <= 4+'c', n;
 }

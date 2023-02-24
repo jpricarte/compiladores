@@ -157,7 +157,8 @@ comando_simples: var_local {$$ = $1;}
                | bloco_comandos {$$ = $1;};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
-// TODO: fazer a conversão do valor quando mudar o tipo
+// TODO: fazer a conversão do valor quando mudar o tipo;
+// TODO: Arrumar questões de conversão nas operações;
 var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
          | TK_PR_FLOAT lista_var_local_float {$$ = $2;}
          | TK_PR_BOOL lista_var_local_bool {$$ = $2;}
@@ -257,9 +258,9 @@ var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                     symbol_table_stack.insert_top($1->get_token_val(), s);
                                     delete $1;
                                   }
-               | TK_IDENTIFICADOR { if ($4->get_node_type() == Type::CHARACTER) {
-                                        delete $$;
-                                        exit(ERR_CHAR_TO_FLOAT);
+               | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
                                     }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
                                                             // Verifica erro de conversão
                                                             if ($4->get_node_type() == Type::CHARACTER) {

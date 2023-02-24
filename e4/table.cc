@@ -47,27 +47,3 @@ void SymbolTableStack::insert_top(TokenVal lv, Symbol s) {
     this->top().insert({lv, s});
     // printf("inserido\n");
 }
-
-
-/*
-struct Symbol {
-    int line_no;
-    Kind kind;
-    Type type; // Declarado em tree.hh
-    size_t size;
-    Node_p assoc_node;
-};
-
-struct LexicalVal {
-    int line_no;
-    TokenType token_type;
-    TokenVal token_val;
-};
-
-struct Node {
-    LexicalVal lex_val;
-    std::vector<std::shared_ptr<Node>> children;
-    bool is_func_call = false;
-    Type node_type;
-};
-*/
