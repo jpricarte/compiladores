@@ -22,10 +22,11 @@ struct Symbol {
 typedef std::map<TokenVal, Symbol&> SymbolTable;
 
 Type type_infer (Type symbol_1, Type symbol_2);
+size_t get_size_from_type(const Type t);
 
 struct SymbolTableStack {;
     /*
-     *  - função para buscar simbolo na pilha (getsymboltable): varre a pilha de cima para baixo procurando um simbolo
+     *  - função para buscar simbolo na pilha: varre a pilha de cima para baixo procurando um simbolo
      *
      */
 public :
@@ -42,7 +43,10 @@ public :
     inline SymbolTable& top() {
         return this->stack.back();
     }; // retorna a table mais de cima
-    int findSymbolTable(int key); // retorna indice na stack ou -1
+    int find_symbol_table(int key); // retorna indice na stack ou -1
+    void insert_top(Symbol s);
+    // Apenas cria o símbolo, não considera no caso de arranjo (tem que ser atualizado)
+    void emplace_top(Node_p node);
 private:
     std::vector<SymbolTable> stack;
 };

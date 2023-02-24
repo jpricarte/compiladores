@@ -880,7 +880,7 @@ case 8:
 YY_RULE_SETUP
 #line 37 "scanner.l"
 {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("int"));
     return TK_PR_INT;
 }
 	YY_BREAK
@@ -888,7 +888,7 @@ case 9:
 YY_RULE_SETUP
 #line 41 "scanner.l"
 {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("float"));
     return TK_PR_FLOAT;
 }
 	YY_BREAK
@@ -896,7 +896,7 @@ case 10:
 YY_RULE_SETUP
 #line 45 "scanner.l"
 {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("bool"));
     return TK_PR_BOOL;
 }
 	YY_BREAK
@@ -904,7 +904,7 @@ case 11:
 YY_RULE_SETUP
 #line 49 "scanner.l"
 {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("char"));
     return TK_PR_CHAR;
 }
 	YY_BREAK

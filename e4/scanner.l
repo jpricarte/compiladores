@@ -34,19 +34,19 @@ identificador	[[:alpha:]]+
 
  /* Palavras Reservadas da linguagem, incluindo literais True e False */
 "int"   {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("int"));
     return TK_PR_INT;
 }
 "float" {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("float"));
     return TK_PR_FLOAT;
 }
 "bool"  {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("bool"));
     return TK_PR_BOOL;
 }
 "char"  {
-    yylval.valor_lexico = nullptr;
+    yylval.valor_lexico = new Node(yylineno, TokenType::RESERVED_WORD, TokenVal("char"));
     return TK_PR_CHAR;
 }
 

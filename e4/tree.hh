@@ -38,7 +38,7 @@ struct Node {
     LexicalVal lex_val;
     std::vector<std::shared_ptr<Node>> children;
     bool is_func_call = false;
-    Type node_type; // todo
+    Type node_type;
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
@@ -50,6 +50,7 @@ struct Node {
 
     std::string to_string();
 
+    inline LexicalVal get_lex_val() { return this->lex_val; }
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
     inline void set_is_func_call(bool b) { this->is_func_call = b; }

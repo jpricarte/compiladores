@@ -1,18 +1,11 @@
-/*
- *	TODO definir/inferir tipo em todas operações
- */
-
-
 %{
 #include <iostream>
 #include <memory>
-#include "tree.hh"
 #include "table.hh"
 extern int get_line_number();
 extern void* arvore;
 int yylex(void);
 void yyerror (const char *msg);
-SymbolTableStack symbol_table_stack{};
 %}
 
 %require "3.0.4"
@@ -102,12 +95,12 @@ SymbolTableStack symbol_table_stack{};
 
 %%
 
-programa: { symbol_table_stack.push_new(); } lista_elem {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
+programa: lista_elem {$$ = $1; arvore = $$;};
 
 lista_elem: %empty {$$ = nullptr;}
           | elemento lista_elem {
             if ($$!=nullptr) {
-                $$ = $1;
+                $$ = $1; 
                 $$->add_child($2);
             } else {
                 $$ = $2;
@@ -131,7 +124,7 @@ lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR '(' lista_parametros ')' corpo_funcao {
-    $$ = $2;
+    $$ = $2; 
     $$->add_child($6);
     };
 
@@ -144,148 +137,127 @@ parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
 corpo_funcao: bloco_comandos {$$ = $1;};
 
 /* Bloco de comandos */
-bloco_comandos: '{' { symbol_table_stack.push_new(); } lista_comandos '}' {$$ = $3; symbol_table_stack.pop(); };
+bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
 
 lista_comandos: %empty {$$ = nullptr;}
               | comando_simples ';' lista_comandos {
                 if ($1 != nullptr) {
-                    $$ = $1;
+                    $$ = $1; 
                     $$->add_child($3);
                 } else {
                     $$ = $3;
                 }};
 
-comando_simples: var_local {$$ = $1; $$->set_node_type($1->get_node_type());}
-               | atribuicao {$$ = $1; $$->set_node_type($1->get_node_type());}
-               | con_fluxo {$$ = $1; $$->set_node_type($1->get_node_type());}
-               | op_retorno {$$ = $1; $$->set_node_type($1->get_node_type());}
-               | cham_funcao {$$ = $1; $$->set_node_type($1->get_node_type());}
-               | bloco_comandos {$$ = $1; $$->set_node_type($1->get_node_type());};
+comando_simples: var_local {$$ = $1;}
+               | atribuicao {$$ = $1;}
+               | con_fluxo {$$ = $1;}
+               | op_retorno {$$ = $1;}
+               | cham_funcao {$$ = $1;}
+               | bloco_comandos {$$ = $1;};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
-var_local: TK_PR_INT lista_var_local_int {$$ = $2;
-					  $$->set_node_type(Type::INTEGER);}
-         | TK_PR_FLOAT lista_var_local_float {$$ = $2;
-         				      $$->set_node_type(Type::FLOATING);}
-         | TK_PR_BOOL lista_var_local_bool {$$ = $2;
-         				    $$->set_node_type(Type::BOOLEAN);}
-         | TK_PR_CHAR lista_var_local_char {$$ = $2;
-         				    $$->set_node_type(Type::CHARACTER);};
+var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
+         | TK_PR_FLOAT lista_var_local_float {$$ = $2;}
+         | TK_PR_BOOL lista_var_local_bool {$$ = $2;}
+         | TK_PR_CHAR lista_var_local_char {$$ = $2;};
 
 /* inteiro */
 lista_var_local_int: %empty {$$ = nullptr;}
-                   | var_local_int lista_var_local_int
+                   | var_local_int lista_var_local_int 
                    {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($2);
                         } else {
                             $$ = $2;
                         }
-                        $$->set_node_type(Type::INTEGER);
                     };
-                   | var_local_int ',' lista_var_local_int
+                   | var_local_int ',' lista_var_local_int 
                    {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($3);
                         } else {
                             $$ = $3;
                         }
-                        $$->set_node_type(Type::INTEGER);
                     };
 
-var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;
-				 $$->set_node_type(Type::INTEGER);}
-             | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);
-             					      $$->set_node_type(Type::INTEGER);};
+var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+             | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* ponto flutuante */
 lista_var_local_float: %empty {$$ = nullptr;}
                      | var_local_float lista_var_local_float
                      {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($2);
                         } else {
                             $$ = $2;
                         }
-                        $$->set_node_type(Type::FLOATING);
                     };
                      | var_local_float ',' lista_var_local_float
                      {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($3);
                         } else {
                             $$ = $3;
                         }
-                        $$->set_node_type(Type::FLOATING);
                     };
 
-var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;
-				   $$->set_node_type(Type::FLOATING);}
-               | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);
-               						$$->set_node_type(Type::FLOATING);};
+var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+               | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* booleano */
 lista_var_local_bool: %empty {$$ = nullptr;}
                     | var_local_bool lista_var_local_bool
                     {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($2);
                         } else {
                             $$ = $2;
                         }
-                        $$->set_node_type(Type::BOOLEAN);
                     };
                     | var_local_bool ',' lista_var_local_bool
                     {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($3);
                         } else {
                             $$ = $3;
                         }
-                        $$->set_node_type(Type::BOOLEAN);
                     };
 
-var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;
-				  $$->set_node_type(Type::BOOLEAN);}
-              | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);
-              					       $$->set_node_type(Type::BOOLEAN);};
+var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+              | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 /* caracter */
 lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char
                     {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($2);
                         } else {
                             $$ = $2;
                         }
-                        $$->set_node_type(Type::CHARACTER);
                     };
                     | var_local_char ',' lista_var_local_char
                     {
                         if ($1 != nullptr) {
-                            $$ = $1;
+                            $$ = $1; 
                             $$->add_child($3);
                         } else {
                             $$ = $3;
                         }
-                        $$->set_node_type(Type::CHARACTER);
                     };
 
-var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;
-				  $$->set_node_type(Type::CHARACTER);}
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);
-              					       $$->set_node_type(Type::CHARACTER);};
+var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
+              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 /* Comando de Atribuição */
-atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);
-					   $$->set_node_type($1->get_node_type());};
+atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
 
 identificador: TK_IDENTIFICADOR {$$ = $1;}
              | TK_IDENTIFICADOR '[' lista_indices ']' {
@@ -298,30 +270,25 @@ lista_indices: expressao_7 {$$ = $1;}
              | lista_indices '^' expressao_7 {$$ = $2; $$->add_child($3); $$->add_child($1);};
 
 /* Chamada de função */
-cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($3);
-							$$->set_node_type($1->get_node_type());};
+cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($3);};
 
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}
                 | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};
 
 /* Comando de retorno */
-op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
-				       $$->set_node_type($2->get_node_type());};
+op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);};
 
 /* Controle de fluxo */
-con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
-								   $$->set_node_type($3->get_node_type());}
-         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos
+con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);}
+         | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
          {
-            $$ = $1;
-            $$->add_child($3);
-            $$->add_child($6);
+            $$ = $1; 
+            $$->add_child($3); 
+            $$->add_child($6); 
             $$->add_child($8);
-            $$->set_node_type($3->get_node_type());
          }
-         | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
-         						   $$->set_node_type($3->get_node_type());};
+         | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
 
@@ -332,6 +299,7 @@ expressao_7: expressao_6 { $$ = $1; }
 expressao_6: expressao_5 { $$ = $1; }
            | expressao_6 TK_OC_AND expressao_5 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					 $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
+
 
 expressao_5: expressao_4 { $$ = $1; }
            | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
@@ -349,13 +317,14 @@ expressao_4: expressao_3 { $$ = $1; }
            | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
+
 expressao_3: expressao_2 { $$ = $1; }
            | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
-expressao_2: expressao_1
+expressao_2: expressao_1 { $$ = $1; }
            | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); }
            | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
@@ -364,7 +333,7 @@ expressao_2: expressao_1
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type())); };
 
 expressao_1: operando { $$ = $1; }
-           | '(' expressao_7 ')' { $$ = $2; $$->set_node_type($2->get_node_type()); }
+           | '(' expressao_7 ')' { $$ = $2; }
            | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); }
            | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type()); } ;
 
@@ -379,10 +348,10 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
        | TK_LIT_TRUE { $$ = $1; $$->set_node_type(Type::BOOLEAN); }
        | TK_LIT_FALSE { $$ = $1; $$->set_node_type(Type::BOOLEAN); };
 
-tipo_primitivo: TK_PR_INT { $$ = nullptr; $$->set_node_type(Type::INTEGER);}
-              | TK_PR_FLOAT { $$ = nullptr; $$->set_node_type(Type::FLOATING);}
-              | TK_PR_CHAR { $$ = nullptr; $$->set_node_type(Type::CHARACTER);}
-              | TK_PR_BOOL { $$ = nullptr; $$->set_node_type(Type::BOOLEAN);};
+tipo_primitivo: TK_PR_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
+              | TK_PR_FLOAT { $$ = $1; $$->set_node_type(Type::FLOATING); }
+              | TK_PR_CHAR { $$ = $1; $$->set_node_type(Type::CHARACTER); }
+              | TK_PR_BOOL { $$ = $1; $$->set_node_type(Type::BOOLEAN); };
 
 
 
