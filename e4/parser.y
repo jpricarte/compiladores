@@ -6,6 +6,7 @@ extern int get_line_number();
 extern void* arvore;
 int yylex(void);
 void yyerror (const char *msg);
+SymbolTableStack symbol_table_stack{};
 %}
 
 %require "3.0.4"
@@ -95,7 +96,7 @@ void yyerror (const char *msg);
 
 %%
 
-programa: lista_elem {$$ = $1; arvore = $$;};
+programa: { symbol_table_stack.push_new(); } lista_elem {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
 
 lista_elem: %empty {$$ = nullptr;}
           | elemento lista_elem {
@@ -137,7 +138,7 @@ parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
 corpo_funcao: bloco_comandos {$$ = $1;};
 
 /* Bloco de comandos */
-bloco_comandos: '{' lista_comandos '}' {$$ = $2;};
+bloco_comandos: '{' { symbol_table_stack.push_new(); } lista_comandos '}' {$$ = $3; symbol_table_stack.pop(); };
 
 lista_comandos: %empty {$$ = nullptr;}
               | comando_simples ';' lista_comandos {
@@ -156,10 +157,12 @@ comando_simples: var_local {$$ = $1;}
                | bloco_comandos {$$ = $1;};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
+// TODO: fazer a conversão do valor quando mudar o tipo
 var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
          | TK_PR_FLOAT lista_var_local_float {$$ = $2;}
          | TK_PR_BOOL lista_var_local_bool {$$ = $2;}
          | TK_PR_CHAR lista_var_local_char {$$ = $2;};
+
 
 /* inteiro */
 lista_var_local_int: %empty {$$ = nullptr;}
@@ -182,8 +185,40 @@ lista_var_local_int: %empty {$$ = nullptr;}
                         }
                     };
 
-var_local_int: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-             | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
+var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
+                                    if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
+                                    }
+                                    /*Insere na tabela de simbolos e apaga nodo*/;
+                                    Symbol s{
+                                                $1->get_line_no(), 
+                                                Kind::VARIABLE, 
+                                                Type::INTEGER, 
+                                                get_size_from_type(Type::INTEGER), 
+                                                nullptr
+                                            };
+                                    symbol_table_stack.insert_top($1->get_token_val(), s);
+                                    delete $1;
+                                  }
+             | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
+                                  }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
+                                                            if ($4->get_node_type() == Type::CHARACTER) {
+                                                                delete $$;
+                                                                exit(ERR_CHAR_TO_INT);
+                                                            }
+                                                            Symbol s{
+                                                                $1->get_line_no(), 
+                                                                Kind::VARIABLE, 
+                                                                Type::INTEGER, 
+                                                                get_size_from_type(Type::INTEGER), 
+                                                                $3
+                                                            };
+                                                            symbol_table_stack.insert_top($1->get_token_val(), s);
+                                                            $$->set_node_type(Type::INTEGER);
+                                                          };
 
 /* ponto flutuante */
 lista_var_local_float: %empty {$$ = nullptr;}
@@ -206,8 +241,41 @@ lista_var_local_float: %empty {$$ = nullptr;}
                         }
                     };
 
-var_local_float: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-               | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
+var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
+                                    if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
+                                    }
+                                    /*Insere na tabela de simbolos e apaga nodo*/;
+                                    Symbol s{
+                                                $1->get_line_no(), 
+                                                Kind::VARIABLE, 
+                                                Type::FLOATING, 
+                                                get_size_from_type(Type::FLOATING), 
+                                                nullptr
+                                            };
+                                    symbol_table_stack.insert_top($1->get_token_val(), s);
+                                    delete $1;
+                                  }
+               | TK_IDENTIFICADOR { if ($4->get_node_type() == Type::CHARACTER) {
+                                        delete $$;
+                                        exit(ERR_CHAR_TO_FLOAT);
+                                    }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
+                                                            // Verifica erro de conversão
+                                                            if ($4->get_node_type() == Type::CHARACTER) {
+                                                                delete $$;
+                                                                exit(ERR_CHAR_TO_FLOAT);
+                                                            }
+                                                            Symbol s{
+                                                                $1->get_line_no(), 
+                                                                Kind::VARIABLE, 
+                                                                Type::FLOATING, 
+                                                                get_size_from_type(Type::FLOATING), 
+                                                                $3
+                                                            };
+                                                            symbol_table_stack.insert_top($1->get_token_val(), s);
+                                                            $$->set_node_type(Type::FLOATING);
+                                                          };
 
 /* booleano */
 lista_var_local_bool: %empty {$$ = nullptr;}
@@ -230,8 +298,42 @@ lista_var_local_bool: %empty {$$ = nullptr;}
                         }
                     };
 
-var_local_bool: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-              | TK_IDENTIFICADOR TK_OC_LE expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
+var_local_bool: TK_IDENTIFICADOR { $$ = nullptr; 
+                                   if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
+                                   }
+                                   /*Insere na tabela de simbolos e apaga nodo*/;
+                                   Symbol s{
+                                            $1->get_line_no(), 
+                                            Kind::VARIABLE, 
+                                            Type::BOOLEAN, 
+                                            get_size_from_type(Type::BOOLEAN), 
+                                            nullptr
+                                        };
+                                   symbol_table_stack.insert_top($1->get_token_val(), s);
+                                   delete $1;
+                                }
+              | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                    delete $1;
+                                    exit(ERR_DECLARED);
+                                }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
+                                                          // Verifica erro de conversão
+                                                          if ($4->get_node_type() == Type::CHARACTER) {
+                                                              delete $$;
+                                                              exit(ERR_CHAR_TO_BOOL);
+                                                          }
+                                                          Symbol s{
+                                                              $1->get_line_no(), 
+                                                              Kind::VARIABLE, 
+                                                              Type::BOOLEAN, 
+                                                              get_size_from_type(Type::BOOLEAN), 
+                                                              $3
+                                                          };
+                                                          symbol_table_stack.insert_top($1->get_token_val(), s);
+                                                          $$->set_node_type(Type::BOOLEAN);
+                                                      };
+
 /* caracter */
 lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char
@@ -252,9 +354,42 @@ lista_var_local_char: %empty {$$ = nullptr;}
                             $$ = $3;
                         }
                     };
-
-var_local_char: TK_IDENTIFICADOR {$$ = nullptr; delete $1;}
-              | TK_IDENTIFICADOR TK_OC_LE TK_LIT_CHAR {$$ = $2; $$->add_child($1); $$->add_child($3);};
+var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        delete $1;
+                                        exit(ERR_DECLARED);
+                                    }
+                                    $$ = nullptr; 
+                                    /*Insere na tabela de simbolos e apaga nodo*/;
+                                    Symbol s{
+                                            $1->get_line_no(), 
+                                            Kind::VARIABLE, 
+                                            Type::CHARACTER, 
+                                            get_size_from_type(Type::CHARACTER), 
+                                            nullptr
+                                        };
+                                    symbol_table_stack.insert_top($1->get_token_val(), s);
+                                    delete $1;
+                                 }
+              | TK_IDENTIFICADOR {
+                if (symbol_table_stack.is_declared($1->get_token_val())) {
+                    delete $1;
+                    exit(ERR_DECLARED);
+                }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
+                                        // Verifica erro de conversão
+                                        if ($4->get_node_type() != Type::CHARACTER) {
+                                            delete $$;
+                                            exit(ERR_X_TO_CHAR);
+                                        }
+                                        Symbol s{
+                                            $1->get_line_no(), 
+                                            Kind::VARIABLE, 
+                                            Type::CHARACTER, 
+                                            get_size_from_type(Type::CHARACTER), 
+                                            $3
+                                        };
+                                        symbol_table_stack.insert_top($1->get_token_val(), s);
+              					        $$->set_node_type(Type::CHARACTER);
+                                    };
 
 /* Comando de Atribuição */
 atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};

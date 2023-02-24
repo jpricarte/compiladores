@@ -4,6 +4,17 @@
 #include <vector>
 #include "tree.hh"
 
+#define ERR_UNDECLARED 10 //2.2
+#define ERR_DECLARED 11 //2.2
+#define ERR_VARIABLE 20 //2.3
+#define ERR_ARRAY 21 //2.3
+#define ERR_FUNCTION 22 //2.3
+#define ERR_CHAR_TO_INT 31 //2.4
+#define ERR_CHAR_TO_FLOAT 32 //2.4
+#define ERR_CHAR_TO_BOOL 33 //2.4
+#define ERR_CHAR_VECTOR 34 //2.4
+#define ERR_X_TO_CHAR 35 //2.4
+
 enum class Kind {
     LITERAL,
     VARIABLE,
@@ -16,7 +27,7 @@ struct Symbol {
     Kind kind;
     Type type; // Declarado em tree.hh
     size_t size;
-    Node_p assoc_node;
+    Node* assoc_node;
 };
 
 typedef std::map<TokenVal, Symbol&> SymbolTable;
@@ -25,30 +36,23 @@ Type type_infer (Type symbol_1, Type symbol_2);
 size_t get_size_from_type(const Type t);
 
 struct SymbolTableStack {;
-    /*
-     *  - função para buscar simbolo na pilha: varre a pilha de cima para baixo procurando um simbolo
-     *
-     */
+private:
+    std::vector<SymbolTable> stack {};
 public :
     // funções para manipular stack;
-    inline void push(SymbolTable& st) {
-        this->stack.push_back(st);
-    };
-    inline void push_new() {
-        this->stack.push_back(SymbolTable{});
-    };
-    inline void pop() {
-        this->stack.pop_back();
-    }; // deleta tabela de cima
-    inline SymbolTable& top() {
-        return this->stack.back();
-    }; // retorna a table mais de cima
-    int find_symbol_table(int key); // retorna indice na stack ou -1
-    void insert_top(Symbol s);
+    inline void push(SymbolTable& st) { this->stack.push_back(st); };
+    inline void push_new() { this->stack.push_back(SymbolTable{}); };
+    inline void pop() { this->stack.pop_back(); }; // deleta tabela de cima
+    inline SymbolTable& top() { return this->stack.back(); }; // retorna a table mais de cima
+        /*
+     *  - função para buscar simbolo na pilha: varre a pilha de cima para baixo procurando um simbolo
+     *  - retorna indice na stack ou -1
+     */
+    int find_symbol_table(TokenVal key);
+    inline bool is_declared(TokenVal key) { return find_symbol_table(key) > 0; };
+    void insert_top(TokenVal, Symbol s);
     // Apenas cria o símbolo, não considera no caso de arranjo (tem que ser atualizado)
     void emplace_top(Node_p node);
-private:
-    std::vector<SymbolTable> stack;
 };
 // note https://cplusplus.com/reference/vector/vector/
 

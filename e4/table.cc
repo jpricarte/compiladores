@@ -32,19 +32,20 @@ size_t get_size_from_type(const Type t) {
     }
 }
 
-void SymbolTableStack::emplace_top(Node_p node) {
-    Symbol s{};
-    s.line_no = node->get_line_no();
-    s.type = node->get_node_type();
-    s.size = get_size_from_type(s.type);
-    s.assoc_node = node;
-
-    this->top().insert({node->get_token_val(), s});
+int SymbolTableStack::find_symbol_table(TokenVal key) {
+    int i = this->stack.size()-1;
+    for (; i>=0; i--) {
+        if (this->stack[i].find(key) != this->stack[i].end())
+            break;
+    }
+    return i;
 }
 
-void SymbolTableStack::insert_top(Symbol s) {
-    TokenVal val = s.assoc_node->get_token_val();
-    this->top().insert({val, s});
+void SymbolTableStack::emplace_top(Node_p node) {}
+
+void SymbolTableStack::insert_top(TokenVal lv, Symbol s) {
+    this->top().insert({lv, s});
+    // printf("inserido\n");
 }
 
 
