@@ -172,9 +172,10 @@ lista_dimensoes: TK_LIT_INT { array_size = get<int>($1->get_token_val());
                                                 };
 
 /* Definição de funções */
-funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val()))
-					      send_error_message($2, ERR_DECLARED);
+funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) {
+					                          send_error_message($2, ERR_DECLARED);
                                               exit(ERR_DECLARED);
+                                          }
                                             Symbol s{
                                                         $2->get_line_no(), 
                                                         Kind::FUNCTION, 
@@ -260,7 +261,7 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     delete $1;
                                   }
              | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
-             				send_error_message($1, ERR_DECLARED);
+             				            send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                   }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);

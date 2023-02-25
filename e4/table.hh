@@ -50,7 +50,7 @@ public :
      *  - retorna indice na stack ou -1
      */
     int find_symbol_table(TokenVal key);
-    inline bool is_declared(TokenVal key) { return top().contains(key); };
+    inline bool is_declared(TokenVal key) { return this->top().contains(key); };
     inline bool is_not_declared(TokenVal key) { return find_symbol_table(key) < 0; };
     void insert_top(TokenVal lv, Symbol s);
     // Apenas cria o símbolo, não considera no caso de arranjo (tem que ser atualizado)
