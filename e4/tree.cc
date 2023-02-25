@@ -45,6 +45,8 @@ std::string token_type_to_string (TokenType tt) {
             return "int";
         case TokenType::LIT_FLOAT:
             return "float";
+        default:
+            return "";
     }
 }
 

@@ -165,7 +165,8 @@ lista_dimensoes: TK_LIT_INT { array_size = get<int>($1->get_token_val());
                                                 };
 
 /* Definição de funções */
-funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) 
+funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val()))
+					      send_error_message($2, ERR_DECLARED);
                                               exit(ERR_DECLARED);
                                             Symbol s{
                                                         $2->get_line_no(), 
@@ -236,8 +237,8 @@ lista_var_local_int: %empty {$$ = nullptr;}
 
 var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     if (symbol_table_stack.is_declared($1->get_token_val())) {
-                                        delete $1;
                                         send_error_message($1, ERR_DECLARED);
+                                        delete $1;
                                         exit(ERR_DECLARED);
                                     }
                                     /*Insere na tabela de simbolos e apaga nodo*/;
@@ -252,6 +253,7 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     delete $1;
                                   }
              | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+             				send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                   }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
@@ -292,6 +294,7 @@ lista_var_local_float: %empty {$$ = nullptr;}
 
 var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                     if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                    	send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                     }
@@ -307,6 +310,7 @@ var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                     delete $1;
                                   }
                | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+               				send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                     }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
@@ -348,6 +352,7 @@ lista_var_local_bool: %empty {$$ = nullptr;}
 
 var_local_bool: TK_IDENTIFICADOR { $$ = nullptr; 
                                    if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                   	send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                    }
@@ -363,6 +368,7 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                    delete $1;
                                 }
               | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+              			    send_error_message($1, ERR_DECLARED);
                                     delete $1;
                                     exit(ERR_DECLARED);
                                 }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
@@ -402,6 +408,7 @@ lista_var_local_char: %empty {$$ = nullptr;}
                         }
                     };
 var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_token_val())) {
+					send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                     }
@@ -419,6 +426,7 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                  }
               | TK_IDENTIFICADOR {
                 if (symbol_table_stack.is_declared($1->get_token_val())) {
+                    send_error_message($1, ERR_DECLARED);
                     delete $1;
                     exit(ERR_DECLARED);
                 }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
@@ -587,41 +595,43 @@ void yyerror (const char *msg) {
     std::cerr << "line " << get_line_number() << ": " << msg << std::endl;
 }
 
-
 void send_error_message (Node* node, int code) {
+    std::cout << "ADASDASDASD" << std::endl;
+    int line_no = node->get_line_no();
+    std::string token_val = std::get<std::string>(node->get_token_val());
+    std::cout << token_val << std::endl;
+    std::string token_type = token_type_to_string(node->get_token_type());
 
-//    std::cout << "[TESTE] " << std::endl << node->get_lex_val().token_type << std::endl << node->get_lex_val().token_val << std::endl;
-
-    switch (code) {
-        case ERR_UNDECLARED:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Variável VAR não foi declarada." << std::endl;
-        case ERR_DECLARED:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Variável VAR foi declarada na linha X e não pode ser redeclarada." <<std::endl;
-        case ERR_VARIABLE:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Uso indevido da variável VAR." <<std::endl;
-        case ERR_ARRAY:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Uso indevido do arranjo ARR." <<std::endl;
-        case ERR_FUNCTION:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Uso indevido da função VAR." <<std::endl;
-        case ERR_CHAR_TO_INT:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Conversão char >> int não suportada." <<std::endl;
-        case ERR_CHAR_TO_FLOAT:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Conversão char >> float não suportada." <<std::endl;
-        case ERR_CHAR_TO_BOOL:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Conversão char >> bool não suportada." <<std::endl;
-        case ERR_CHAR_VECTOR:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Vetores de char não são suportados." <<std::endl;
-        case ERR_X_TO_CHAR:
-           std::cout << "[ERRO linha " << node->get_line_no()
-                 << "] Conversão TIPO_TOKEN >> char não suportada." << std::endl;
+    if (code == ERR_UNDECLARED) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Variável " << token_val << " não foi declarada." << std::endl;
+    } else if (code == ERR_DECLARED) {
+        // NOTE: daria pra pegar o numero da linha da declaração anterior acessando a tabela de simbolos
+        std::cout << "[ERRO linha " << line_no
+                  << "] Variável " << token_val << " foi declarada na linha X e não pode ser redeclarada." <<std::endl;
+    } else if (code == ERR_VARIABLE) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Uso indevido da variável " << token_val << "." <<std::endl;
+    } else if (code == ERR_ARRAY) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Uso indevido do arranjo " << token_val << "." <<std::endl;
+    } else if (code == ERR_FUNCTION) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Uso indevido da função " << token_val << "." <<std::endl;
+    } else if (code == ERR_CHAR_TO_INT) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Conversão char >> int não suportada." <<std::endl;
+    } else if (code == ERR_CHAR_TO_FLOAT) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Conversão char >> float não suportada." <<std::endl;
+    } else if (code == ERR_CHAR_TO_BOOL) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Conversão char >> bool não suportada." <<std::endl;
+    } else if (code == ERR_CHAR_VECTOR) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Vetores de char não são suportados." <<std::endl;
+    } else if (code == ERR_X_TO_CHAR) {
+        std::cout << "[ERRO linha " << line_no
+                  << "] Conversão " << token_type << " >> char não suportada." << std::endl;
     }
 }

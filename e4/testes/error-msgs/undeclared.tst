@@ -1,4 +1,4 @@
 int foo () {
     int a;
-    int a;
+    b = a * 5;
 }
