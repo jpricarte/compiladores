@@ -34,6 +34,7 @@ typedef std::map<TokenVal, Symbol&> SymbolTable;
 
 Type type_infer (Type symbol_1, Type symbol_2);
 size_t get_size_from_type(const Type t);
+int get_char_err(Type to, Type from);
 
 struct SymbolTableStack {;
 private:

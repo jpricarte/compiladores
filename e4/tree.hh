@@ -23,7 +23,7 @@ enum class Type {
     FLOATING,
     CHARACTER,
     BOOLEAN,
-    TYPE_ERROR
+    TYPE_ERROR,
 };
 
 typedef std::variant<std::string, int, float, char, bool> TokenVal;

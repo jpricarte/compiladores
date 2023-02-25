@@ -206,10 +206,9 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                         delete $1;
                                         exit(ERR_DECLARED);
                                   }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
-                                                            if ($4->get_node_type() == Type::CHARACTER) {
-                                                                delete $$;
-                                                                exit(ERR_CHAR_TO_INT);
-                                                            }
+                                                            $1->set_node_type(Type::INTEGER);
+                                                            int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                                                            if (exit_code > 0) exit(exit_code);
                                                             Symbol s{
                                                                 $1->get_line_no(), 
                                                                 Kind::VARIABLE, 
@@ -263,10 +262,9 @@ var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                         exit(ERR_DECLARED);
                                     }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
                                                             // Verifica erro de conversão
-                                                            if ($4->get_node_type() == Type::CHARACTER) {
-                                                                delete $$;
-                                                                exit(ERR_CHAR_TO_FLOAT);
-                                                            }
+                                                            $1->set_node_type(Type::FLOATING);
+                                                            int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                                                            if (exit_code > 0) exit(exit_code);
                                                             Symbol s{
                                                                 $1->get_line_no(), 
                                                                 Kind::VARIABLE, 
@@ -320,10 +318,9 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                     exit(ERR_DECLARED);
                                 }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
                                                           // Verifica erro de conversão
-                                                          if ($4->get_node_type() == Type::CHARACTER) {
-                                                              delete $$;
-                                                              exit(ERR_CHAR_TO_BOOL);
-                                                          }
+                                                          $1->set_node_type(Type::BOOLEAN);
+                                                          int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                                                          if (exit_code > 0) exit(exit_code);
                                                           Symbol s{
                                                               $1->get_line_no(), 
                                                               Kind::VARIABLE, 
@@ -378,10 +375,9 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                     exit(ERR_DECLARED);
                 }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
                                         // Verifica erro de conversão
-                                        if ($4->get_node_type() != Type::CHARACTER) {
-                                            delete $$;
-                                            exit(ERR_X_TO_CHAR);
-                                        }
+                                        $1->set_node_type(Type::CHARACTER);
+                                        int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                                        if (exit_code > 0) exit(exit_code);
                                         Symbol s{
                                             $1->get_line_no(), 
                                             Kind::VARIABLE, 
@@ -394,7 +390,13 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                     };
 
 /* Comando de Atribuição */
-atribuicao: identificador '=' expressao_7 {$$ = $2; $$->add_child($1); $$->add_child($3);};
+atribuicao: identificador { if (!symbol_table_stack.is_declared($1->get_token_val())) exit(ERR_UNDECLARED); } 
+            '=' expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4); 
+                              // verifica tipos
+                              int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                              if (exit_code > 0) exit(exit_code);
+                              $$->set_node_type($1->get_node_type());
+                            };
 
 identificador: TK_IDENTIFICADOR {$$ = $1;}
              | TK_IDENTIFICADOR '[' lista_indices ']' {
