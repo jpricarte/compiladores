@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include "table.hh"
+#include "error_handler.hh"
 extern int get_line_number();
 extern void* arvore;
 int yylex(void);
@@ -15,6 +16,7 @@ SymbolTableStack symbol_table_stack{};
     #include <memory>
     #include "tree.hh"
     #include "table.hh"
+    #include "error_handler.hh"
 }
 
 %union {
@@ -196,6 +198,7 @@ lista_var_local_int: %empty {$$ = nullptr;}
 var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     if (symbol_table_stack.is_declared($1->get_token_val())) {
                                         delete $1;
+                                        send_error_message($1, ERR_DECLARED);
                                         exit(ERR_DECLARED);
                                     }
                                     /*Insere na tabela de simbolos e apaga nodo*/;
