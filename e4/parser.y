@@ -1,15 +1,20 @@
 %{
 #include <iostream>
 #include <memory>
+#include <map>
 #include "table.hh"
-#include "error_handler.hh"
+
 extern int get_line_number();
 extern void* arvore;
+
+void send_error_message (Node* node, int code);
 int yylex(void);
 void yyerror (const char *msg);
+
 SymbolTableStack symbol_table_stack{};
-std::vector<Symbol> var_global_list = {};
+std::vector<std::pair<LexicalVal, Symbol>> var_global_list = {};
 int array_size=0;
+
 %}
 
 %require "3.0.4"
@@ -18,7 +23,6 @@ int array_size=0;
     #include <memory>
     #include "tree.hh"
     #include "table.hh"
-    #include "error_handler.hh"
 }
 
 %union {
@@ -129,7 +133,9 @@ id_var_global: TK_IDENTIFICADOR {   $$=nullptr; delete $1;
                                         1,
                                         nullptr
                                     };
-                                    var_global_list.push_back(s);
+                                    std::pair<LexicalVal, Symbol> p($1->get_lex_val(), s);
+                                    printf("dsa\n");
+                                    // var_global_list.push_back();
                                 }
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' {$$=nullptr; delete $1;};
 
@@ -553,3 +559,41 @@ void yyerror (const char *msg) {
     std::cerr << "line " << get_line_number() << ": " << msg << std::endl;
 }
 
+
+void send_error_message (Node* node, int code) {
+
+   std::cout << "[TESTE] " << std::endl << node->get_lex_val().token_type << std::endl << node->get_lex_val().token_val << std::endl;
+
+    switch (code) {
+        case ERR_UNDECLARED:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Variável VAR não foi declarada." << std::endl;
+        case ERR_DECLARED:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Variável VAR foi declarada na linha X e não pode ser redeclarada." <<std::endl;
+        case ERR_VARIABLE:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Uso indevido da variável VAR." <<std::endl;
+        case ERR_ARRAY:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Uso indevido do arranjo ARR." <<std::endl;
+        case ERR_FUNCTION:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Uso indevido da função VAR." <<std::endl;
+        case ERR_CHAR_TO_INT:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Conversão char >> int não suportada." <<std::endl;
+        case ERR_CHAR_TO_FLOAT:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Conversão char >> float não suportada." <<std::endl;
+        case ERR_CHAR_TO_BOOL:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Conversão char >> bool não suportada." <<std::endl;
+        case ERR_CHAR_VECTOR:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Vetores de char não são suportados." <<std::endl;
+        case ERR_X_TO_CHAR:
+           std::cout << "[ERRO linha " << node->get_line_no()
+                 << "] Conversão TIPO_TOKEN >> char não suportada." << std::endl;
+    }
+}
