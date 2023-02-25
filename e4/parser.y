@@ -123,8 +123,11 @@ elemento: var_global {$$ = $1; var_global_list.clear();}
 var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr; 
                                                      // adiciona todas as variaveis de uma vez na tabela
                                                      for (auto pair : var_global_list) {
-                                                        pair.second.type = $1->get_node_type();
-                                                        pair.second.size *= get_size_from_type($1->get_node_type());
+                                                        Symbol& s = pair.second;
+                                                        s.type = $1->get_node_type();
+                                                        if (s.type == Type::CHARACTER && s.kind == Kind::ARRAY)
+                                                            exit(ERR_CHAR_VECTOR);
+                                                        s.size *= get_size_from_type($1->get_node_type());
                                                         symbol_table_stack.emplace_top(pair);
                                                      }
                                                    };
