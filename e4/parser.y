@@ -167,7 +167,7 @@ var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
 
 /* inteiro */
 lista_var_local_int: %empty {$$ = nullptr;}
-                   | var_local_int lista_var_local_int 
+                   | var_local_int lista_var_local_int
                    {
                         if ($1 != nullptr) {
                             $$ = $1; 
@@ -333,7 +333,6 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                                       };
 
 /* caracter */
-// TODO ERR_CHAR_VECTOR?
 lista_var_local_char: %empty {$$ = nullptr;}
                     | var_local_char lista_var_local_char
                     {
@@ -409,7 +408,8 @@ lista_indices: expressao_7 {$$ = $1;}
              | lista_indices '^' expressao_7 {$$ = $2; $$->add_child($3); $$->add_child($1);};
 
 /* Chamada de função */
-cham_funcao: TK_IDENTIFICADOR '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($3);};
+cham_funcao: TK_IDENTIFICADOR {if (!symbol_table_stack.is_declared($1->get_token_val())) exit(ERR_UNDECLARED);}
+			 '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($4);};
 
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}
