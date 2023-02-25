@@ -12,7 +12,7 @@ int yylex(void);
 void yyerror (const char *msg);
 
 SymbolTableStack symbol_table_stack{};
-std::vector<std::pair<LexicalVal, Symbol>> var_global_list = {};
+std::vector<std::pair<TokenVal, Symbol>> var_global_list = {};
 int array_size=0;
 
 %}
@@ -121,7 +121,12 @@ elemento: var_global {$$ = $1; var_global_list.clear();}
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr; 
-                                                     // adiciona todas as variaveis
+                                                     // adiciona todas as variaveis de uma vez na tabela
+                                                     for (auto pair : var_global_list) {
+                                                        pair.second.type = $1->get_node_type();
+                                                        pair.second.size *= get_size_from_type($1->get_node_type());
+                                                        symbol_table_stack.emplace_top(pair);
+                                                     }
                                                    };
 
 lista_id_var_global: id_var_global {$$ = nullptr;}
@@ -134,7 +139,7 @@ id_var_global: TK_IDENTIFICADOR {   Symbol s{
                                         1,
                                         nullptr
                                     };
-                                    var_global_list.push_back(std::make_pair($1->get_lex_val(), s));
+                                    var_global_list.push_back(std::make_pair($1->get_token_val(), s));
                                     $$=nullptr; delete $1;
                                 }
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' { Symbol s{
@@ -144,7 +149,7 @@ id_var_global: TK_IDENTIFICADOR {   Symbol s{
                                                               array_size,
                                                               nullptr
                                                           };
-                                                          var_global_list.push_back(std::make_pair($1->get_lex_val(), s));
+                                                          var_global_list.push_back(std::make_pair($1->get_token_val(), s));
                                                           array_size = 0;
                                                           $$=nullptr; delete $1;
                                                         };

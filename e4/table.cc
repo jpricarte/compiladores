@@ -63,7 +63,9 @@ int SymbolTableStack::find_symbol_table(TokenVal key) {
     return i;
 }
 
-void SymbolTableStack::emplace_top(Node_p node) {}
+void SymbolTableStack::emplace_top(std::pair<TokenVal, Symbol> p) {
+    this->insert_top(p.first, p.second);
+}
 
 void SymbolTableStack::insert_top(TokenVal lv, Symbol s) {
     this->top().insert({lv, s});
