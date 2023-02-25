@@ -156,7 +156,7 @@ id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_t
                                                               $1->get_line_no(),
                                                               Kind::ARRAY,
                                                               Type::TYPE_ERROR,
-                                                              array_size,
+                                                              (size_t) array_size,
                                                               nullptr
                                                           };
                                                           var_global_list.push_back(std::make_pair($1->get_token_val(), s));
@@ -604,7 +604,6 @@ void yyerror (const char *msg) {
 }
 
 void send_error_message (Node* node, int code) {
-    std::cout << "ADASDASDASD" << std::endl;
     int line_no = node->get_line_no();
     std::string token_val = std::get<std::string>(node->get_token_val());
     std::cout << token_val << std::endl;

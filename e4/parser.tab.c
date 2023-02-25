@@ -1656,7 +1656,7 @@ yyreduce:
                                                               (yyvsp[-3].valor_lexico)->get_line_no(),
                                                               Kind::ARRAY,
                                                               Type::TYPE_ERROR,
-                                                              array_size,
+                                                              (size_t) array_size,
                                                               nullptr
                                                           };
                                                           var_global_list.push_back(std::make_pair((yyvsp[-3].valor_lexico)->get_token_val(), s));
@@ -2755,7 +2755,6 @@ void yyerror (const char *msg) {
 }
 
 void send_error_message (Node* node, int code) {
-    std::cout << "ADASDASDASD" << std::endl;
     int line_no = node->get_line_no();
     std::string token_val = std::get<std::string>(node->get_token_val());
     std::cout << token_val << std::endl;
