@@ -18,6 +18,8 @@ enum class TokenType {
     LIT_BOOL, // bool
 };
 
+string token_type_to_string (TokenType tt);
+
 enum class Type {
     INTEGER,
     FLOATING,
@@ -53,6 +55,7 @@ struct Node {
     inline LexicalVal get_lex_val() { return this->lex_val; }
     inline int get_line_no() { return this->lex_val.line_no; }
     inline TokenVal get_token_val() { return this->lex_val.token_val; }
+    inline TokenType get_token_type() { return this->lex_val.token_type; }
     inline void set_is_func_call(bool b) { this->is_func_call = b; }
     inline void set_node_type(Type t) { this->node_type = t; }
     inline Type get_node_type() { return this->node_type; }

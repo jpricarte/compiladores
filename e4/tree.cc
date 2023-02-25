@@ -33,6 +33,21 @@ void Node::add_null_child() {
     this->children.push_back(nullptr);
 }
 
+string token_type_to_string (TokenType tt) {
+    switch (tt) {
+        case TokenType::IDENTIFIER:
+            return "identificador";
+        case TokenType::LIT_BOOL:
+            return "bool";
+        case TokenType::LIT_CHAR:
+            return "char";
+        case TokenType::LIT_INT:
+            return "int";
+        case TokenType::LIT_FLOAT:
+            return "float";
+    }
+}
+
 string Node::to_string() {
     switch (this->lex_val.token_type) {
         case TokenType::SPECIAL_CHAR:
