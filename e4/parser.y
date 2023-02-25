@@ -120,27 +120,41 @@ elemento: var_global {$$ = $1; var_global_list.clear();}
         | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
-var_global: tipo_primitivo lista_id_var_global ';' {$$ = nullptr;};
+var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr; 
+                                                     // adiciona todas as variaveis
+                                                   };
 
 lista_id_var_global: id_var_global {$$ = nullptr;}
                    | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
-id_var_global: TK_IDENTIFICADOR {   $$=nullptr; delete $1;
-                                    Symbol s{
+id_var_global: TK_IDENTIFICADOR {   Symbol s{
                                         $1->get_line_no(),
                                         Kind::VARIABLE,
                                         Type::TYPE_ERROR,
                                         1,
                                         nullptr
                                     };
-                                    std::pair<LexicalVal, Symbol> p($1->get_lex_val(), s);
-                                    printf("dsa\n");
-                                    // var_global_list.push_back();
+                                    var_global_list.push_back(std::make_pair($1->get_lex_val(), s));
+                                    $$=nullptr; delete $1;
                                 }
-             | TK_IDENTIFICADOR '[' lista_dimensoes ']' {$$=nullptr; delete $1;};
+             | TK_IDENTIFICADOR '[' lista_dimensoes ']' { Symbol s{
+                                                              $1->get_line_no(),
+                                                              Kind::VARIABLE,
+                                                              Type::TYPE_ERROR,
+                                                              array_size,
+                                                              nullptr
+                                                          };
+                                                          var_global_list.push_back(std::make_pair($1->get_lex_val(), s));
+                                                          array_size = 0;
+                                                          $$=nullptr; delete $1;
+                                                        };
 
-lista_dimensoes: TK_LIT_INT {array_size = get<int>($1->get_token_val()); $$=nullptr; delete $1;}
-               | lista_dimensoes '^' TK_LIT_INT {array_size *= get<int>($3->get_token_val()); $$=nullptr; delete $2; delete $3;};
+lista_dimensoes: TK_LIT_INT { array_size = get<int>($1->get_token_val()); 
+                              $$=nullptr; delete $1;
+                            }
+               | lista_dimensoes '^' TK_LIT_INT { array_size *= get<int>($3->get_token_val()); 
+                                                  $$=nullptr; delete $2; delete $3;
+                                                };
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) 
@@ -562,7 +576,7 @@ void yyerror (const char *msg) {
 
 void send_error_message (Node* node, int code) {
 
-   std::cout << "[TESTE] " << std::endl << node->get_lex_val().token_type << std::endl << node->get_lex_val().token_val << std::endl;
+//    std::cout << "[TESTE] " << std::endl << node->get_lex_val().token_type << std::endl << node->get_lex_val().token_val << std::endl;
 
     switch (code) {
         case ERR_UNDECLARED:
