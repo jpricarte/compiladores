@@ -126,6 +126,7 @@ var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr;
                                                         pair.second.type = $1->get_node_type();
                                                         pair.second.size *= get_size_from_type($1->get_node_type());
                                                         symbol_table_stack.emplace_top(pair);
+                                                        std::cout << "adicionado nodo com tamanho " << pair.second.size << std::endl;
                                                      }
                                                    };
 
@@ -144,7 +145,7 @@ id_var_global: TK_IDENTIFICADOR {   Symbol s{
                                 }
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' { Symbol s{
                                                               $1->get_line_no(),
-                                                              Kind::VARIABLE,
+                                                              Kind::ARRAY,
                                                               Type::TYPE_ERROR,
                                                               array_size,
                                                               nullptr
