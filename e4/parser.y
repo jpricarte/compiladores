@@ -126,7 +126,6 @@ var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr;
                                                         pair.second.type = $1->get_node_type();
                                                         pair.second.size *= get_size_from_type($1->get_node_type());
                                                         symbol_table_stack.emplace_top(pair);
-                                                        std::cout << "adicionado nodo com tamanho " << pair.second.size << std::endl;
                                                      }
                                                    };
 
@@ -436,20 +435,24 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                     };
 
 /* Comando de Atribuição */
-atribuicao: identificador { if (!symbol_table_stack.is_declared($1->get_token_val())) exit(ERR_UNDECLARED); } 
-            '=' expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4); 
+atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_child($3); 
                               // verifica tipos
-                              int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                              int exit_code = get_char_err($1->get_node_type(), $3->get_node_type());
                               if (exit_code > 0) exit(exit_code);
-                              
                               $$->set_node_type($1->get_node_type());
                             };
 
-identificador: TK_IDENTIFICADOR { $$ = $1; // Tem que ser var, se não é erro
+identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_declared($1->get_token_val())) {
+                                      exit(ERR_UNDECLARED);
+                                  }
+                                  $$ = $1; // Tem que ser var, se não é erro
                                   auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
                                   if (s.kind != Kind::VARIABLE) exit(ERR_VARIABLE);
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
+                if (!symbol_table_stack.is_declared($1->get_token_val())) {
+                    exit(ERR_UNDECLARED);
+                }
                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
                 if (s.kind != Kind::ARRAY) exit(ERR_ARRAY);
                 $$ = new Node($1->get_line_no(), TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
