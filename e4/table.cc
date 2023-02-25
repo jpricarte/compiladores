@@ -69,3 +69,11 @@ void SymbolTableStack::insert_top(TokenVal lv, Symbol s) {
     this->top().insert({lv, s});
     // printf("inserido\n");
 }
+
+Symbol SymbolTableStack::get_first_symbol(TokenVal key) {
+    int index = this->find_symbol_table(key);
+    if (index >= 0) {
+        return this->stack[index][key];
+    }
+    else exit(ERR_UNDECLARED);
+}
