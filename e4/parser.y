@@ -8,6 +8,8 @@ extern void* arvore;
 int yylex(void);
 void yyerror (const char *msg);
 SymbolTableStack symbol_table_stack{};
+std::vector<Symbol> var_global_list = {};
+int array_size=0;
 %}
 
 %require "3.0.4"
@@ -110,7 +112,7 @@ lista_elem: %empty {$$ = nullptr;}
             }
         };
 
-elemento: var_global {$$ = $1;}
+elemento: var_global {$$ = $1; var_global_list.clear();}
         | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
@@ -119,11 +121,20 @@ var_global: tipo_primitivo lista_id_var_global ';' {$$ = nullptr;};
 lista_id_var_global: id_var_global {$$ = nullptr;}
                    | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
-id_var_global: TK_IDENTIFICADOR {$$=nullptr; delete $1;}
+id_var_global: TK_IDENTIFICADOR {   $$=nullptr; delete $1;
+                                    Symbol s{
+                                        $1->get_line_no(),
+                                        Kind::VARIABLE,
+                                        Type::TYPE_ERROR,
+                                        1,
+                                        nullptr
+                                    };
+                                    var_global_list.push_back(s);
+                                }
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' {$$=nullptr; delete $1;};
 
-lista_dimensoes: TK_LIT_INT {$$=nullptr; delete $1;}
-               | lista_dimensoes '^' TK_LIT_INT {$$=nullptr; delete $2; delete $3;};
+lista_dimensoes: TK_LIT_INT {array_size = get<int>($1->get_token_val()); $$=nullptr; delete $1;}
+               | lista_dimensoes '^' TK_LIT_INT {array_size *= get<int>($3->get_token_val()); $$=nullptr; delete $2; delete $3;};
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) 
