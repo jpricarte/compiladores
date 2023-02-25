@@ -18,7 +18,7 @@ enum class TokenType {
     LIT_BOOL, // bool
 };
 
-string token_type_to_string (TokenType tt);
+std::string token_type_to_string (TokenType tt);
 
 enum class Type {
     INTEGER,

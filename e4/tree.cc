@@ -33,7 +33,7 @@ void Node::add_null_child() {
     this->children.push_back(nullptr);
 }
 
-string token_type_to_string (TokenType tt) {
+std::string token_type_to_string (TokenType tt) {
     switch (tt) {
         case TokenType::IDENTIFIER:
             return "identificador";
