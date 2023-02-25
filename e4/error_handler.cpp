@@ -3,7 +3,7 @@
 void send_error_message (Node* node, int code) {
     int line_no = node->get_line_no();
     auto token_val = node->get_token_val();
-    string token_type = token_type_to_string(node->get_token_type());
+    std::string token_type = token_type_to_string(node->get_token_type());
 
     switch (code) {
         case ERR_UNDECLARED:
