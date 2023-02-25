@@ -448,6 +448,7 @@ identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_declared($1->get_to
                                   $$ = $1; // Tem que ser var, se não é erro
                                   auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
                                   if (s.kind != Kind::VARIABLE) exit(ERR_VARIABLE);
+                                  $$->set_node_type(s.type);
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
                 if (!symbol_table_stack.is_declared($1->get_token_val())) {
@@ -458,6 +459,7 @@ identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_declared($1->get_to
                 $$ = new Node($1->get_line_no(), TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
                 $$->add_child($1);
                 $$->add_child($3);
+                $$->set_node_type(s.type);
              };
 
 lista_indices: expressao_7 {$$ = $1;}

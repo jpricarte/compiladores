@@ -43,8 +43,9 @@ int get_char_err(Type to, Type from) {
             case Type::BOOLEAN:
                 return ERR_CHAR_TO_BOOL;
             case Type::CHARACTER:
-            default:
                 return 0;
+            default:
+                return 1;
         }
     } else {
         if (to == Type::CHARACTER)
