@@ -135,7 +135,10 @@ var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr;
 lista_id_var_global: id_var_global {$$ = nullptr;}
                    | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
-id_var_global: TK_IDENTIFICADOR {   Symbol s{
+id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                        exit(ERR_DECLARED);
+                                    }
+                                        Symbol s{
                                         $1->get_line_no(),
                                         Kind::VARIABLE,
                                         Type::TYPE_ERROR,
@@ -145,7 +148,11 @@ id_var_global: TK_IDENTIFICADOR {   Symbol s{
                                     var_global_list.push_back(std::make_pair($1->get_token_val(), s));
                                     $$=nullptr; delete $1;
                                 }
-             | TK_IDENTIFICADOR '[' lista_dimensoes ']' { Symbol s{
+             | TK_IDENTIFICADOR '[' lista_dimensoes ']' { 
+                                                          if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                                              exit(ERR_DECLARED);
+                                                          }
+                                                          Symbol s{
                                                               $1->get_line_no(),
                                                               Kind::ARRAY,
                                                               Type::TYPE_ERROR,
@@ -453,7 +460,7 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                               $$->set_node_type($1->get_node_type());
                             };
 
-identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_declared($1->get_token_val())) {
+identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_not_declared($1->get_token_val())) {
                                       exit(ERR_UNDECLARED);
                                   }
                                   $$ = $1; // Tem que ser var, se não é erro
@@ -462,7 +469,7 @@ identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_declared($1->get_to
                                   $$->set_node_type(s.type);
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
-                if (!symbol_table_stack.is_declared($1->get_token_val())) {
+                if (!symbol_table_stack.is_not_declared($1->get_token_val())) {
                     exit(ERR_UNDECLARED);
                 }
                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
@@ -478,7 +485,7 @@ lista_indices: expressao_7 {$$ = $1;}
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
-                                if (!symbol_table_stack.is_declared($1->get_token_val())) exit(ERR_UNDECLARED);
+                                if (!symbol_table_stack.is_not_declared($1->get_token_val())) exit(ERR_UNDECLARED);
                                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
                                 if (s.kind != Kind::FUNCTION) exit(ERR_FUNCTION);
                               }
