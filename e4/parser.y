@@ -125,8 +125,10 @@ var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr;
                                                      for (auto pair : var_global_list) {
                                                         Symbol& s = pair.second;
                                                         s.type = $1->get_node_type();
-                                                        if (s.type == Type::CHARACTER && s.kind == Kind::ARRAY)
+                                                        if (s.type == Type::CHARACTER && s.kind == Kind::ARRAY) {
+                                                            send_error_message($1, ERR_CHAR_VECTOR);
                                                             exit(ERR_CHAR_VECTOR);
+                                                        }
                                                         s.size *= get_size_from_type($1->get_node_type());
                                                         symbol_table_stack.emplace_top(pair);
                                                      }
@@ -137,6 +139,7 @@ lista_id_var_global: id_var_global {$$ = nullptr;}
                    | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
 id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_token_val())) {
+					send_error_message($1, ERR_DECLARED);
                                         exit(ERR_DECLARED);
                                     }
                                         Symbol s{
@@ -151,6 +154,7 @@ id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_t
                                 }
              | TK_IDENTIFICADOR '[' lista_dimensoes ']' { 
                                                           if (symbol_table_stack.is_declared($1->get_token_val())) {
+                                                              send_error_message($1, ERR_DECLARED);
                                                               exit(ERR_DECLARED);
                                                           }
                                                           Symbol s{
@@ -174,7 +178,7 @@ lista_dimensoes: TK_LIT_INT { array_size = get<int>($1->get_token_val());
 
 /* Definição de funções */
 funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) {
-					                          send_error_message($2, ERR_DECLARED);
+					      send_error_message($2, ERR_DECLARED);
                                               exit(ERR_DECLARED);
                                           }
                                             Symbol s{
@@ -277,7 +281,7 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     delete $1;
                                   }
              | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
-             				            send_error_message($1, ERR_DECLARED);
+				        send_error_message($1, ERR_DECLARED);
                                         delete $1;
                                         exit(ERR_DECLARED);
                                   }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
@@ -478,19 +482,27 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                             };
 
 identificador: TK_IDENTIFICADOR { if (symbol_table_stack.is_not_declared($1->get_token_val())) {
+				      send_error_message($1, ERR_UNDECLARED);
                                       exit(ERR_UNDECLARED);
                                   }
                                   $$ = $1; // Tem que ser var, se não é erro
                                   auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                  if (s.kind != Kind::VARIABLE) exit(ERR_VARIABLE);
+                                  if (s.kind != Kind::VARIABLE) {
+                                  	send_error_message($1, ERR_VARIABLE);
+                                  	exit(ERR_VARIABLE);
+                                  }
                                   $$->set_node_type(s.type);
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
                 if (symbol_table_stack.is_not_declared($1->get_token_val())) {
+                    send_error_message($1, ERR_UNDECLARED);
                     exit(ERR_UNDECLARED);
                 }
                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                if (s.kind != Kind::ARRAY) exit(ERR_ARRAY);
+                if (s.kind != Kind::ARRAY) {
+                	send_error_message($1, ERR_ARRAY);
+                	exit(ERR_ARRAY);
+                }
                 $$ = new Node($1->get_line_no(), TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
                 $$->add_child($1);
                 $$->add_child($3);
@@ -502,9 +514,15 @@ lista_indices: expressao_7 {$$ = $1;}
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
-                                if (symbol_table_stack.is_not_declared($1->get_token_val())) exit(ERR_UNDECLARED);
+                                if (symbol_table_stack.is_not_declared($1->get_token_val())) {
+                                	send_error_message($1, ERR_UNDECLARED);
+                                	exit(ERR_UNDECLARED);
+                                }
                                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                if (s.kind != Kind::FUNCTION) exit(ERR_FUNCTION);
+                                if (s.kind != Kind::FUNCTION) {
+                                	send_error_message($1, ERR_FUNCTION);
+                                	exit(ERR_FUNCTION);
+                                }
                               }
 			 '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($4);};
 
@@ -519,7 +537,10 @@ op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
 								   $$->set_node_type($3->get_node_type());
-								   if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}}
+								   if ($3->get_node_type() == Type::CHARACTER) {
+								   	send_error_message($3, ERR_CHAR_TO_BOOL);
+								   	exit(ERR_CHAR_TO_BOOL);
+								   }}
          | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
          {
             $$ = $1;
@@ -527,73 +548,285 @@ con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->
             $$->add_child($6);
             $$->add_child($8);
             $$->set_node_type($3->get_node_type());
-            if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}
+            if ($3->get_node_type() == Type::CHARACTER) {
+            	send_error_message($3, ERR_CHAR_TO_BOOL);
+            	exit(ERR_CHAR_TO_BOOL);
+            }
          }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
          						   $$->set_node_type($3->get_node_type());
-         						   if ($3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
+         						   if ($3->get_node_type() == Type::CHARACTER) {
+         						   	send_error_message($3, ERR_CHAR_TO_BOOL);
+         						   	exit(ERR_CHAR_TO_BOOL);
+         						   }};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
 
 expressao_7: expressao_6 { $$ = $1; }
            | expressao_7 TK_OC_OR expressao_6 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
+           					if ($1->get_node_type() == Type::CHARACTER) {
+           						send_error_message($3, ERR_CHAR_TO_BOOL);
+							exit(ERR_CHAR_TO_BOOL);
+           					} else if ($3->get_node_type() == Type::CHARACTER) {
+           						send_error_message($3, ERR_CHAR_TO_BOOL);
+							exit(ERR_CHAR_TO_BOOL);
+           					}};
 
 expressao_6: expressao_5 { $$ = $1; }
            | expressao_6 TK_OC_AND expressao_5 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					 $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					 if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}};
+           					 if ($1->get_node_type() == Type::CHARACTER) {
+           					 	send_error_message($1, ERR_CHAR_TO_BOOL);
+							exit(ERR_CHAR_TO_BOOL);
+           					 } else if ($3->get_node_type() == Type::CHARACTER) {
+           					 	send_error_message($3, ERR_CHAR_TO_BOOL);
+							exit(ERR_CHAR_TO_BOOL);
+           					 }};
 
 
 expressao_5: expressao_4 { $$ = $1; }
            | expressao_5 TK_OC_EQ expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           					if ($1->get_node_type() == Type::CHARACTER) {
+           						if ($3->get_node_type() == Type::INTEGER) {
+           							send_error_message($1, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+           						} else if ($3->get_node_type() == Type::FLOATING) {
+								send_error_message($1, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							} else if ($3->get_node_type() == Type::BOOLEAN) {
+								send_error_message($1, ERR_CHAR_TO_BOOL);
+								exit(ERR_CHAR_TO_BOOL);
+							}
+           					} else if ($3->get_node_type() == Type::CHARACTER) {
+           						if ($1->get_node_type() == Type::INTEGER) {
+								send_error_message($3, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($1->get_node_type() == Type::FLOATING) {
+								send_error_message($3, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							} else if ($1->get_node_type() == Type::BOOLEAN) {
+								send_error_message($3, ERR_CHAR_TO_BOOL);
+								exit(ERR_CHAR_TO_BOOL);
+							}
+           					}}
            | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
+           					if ($1->get_node_type() == Type::CHARACTER) {
+           						if ($3->get_node_type() == Type::INTEGER) {
+								send_error_message($1, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($3->get_node_type() == Type::FLOATING) {
+								send_error_message($1, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							} else if ($3->get_node_type() == Type::BOOLEAN) {
+								send_error_message($1, ERR_CHAR_TO_BOOL);
+								exit(ERR_CHAR_TO_BOOL);
+							}
+           					} else if ($3->get_node_type() == Type::CHARACTER) {
+           						if ($1->get_node_type() == Type::INTEGER) {
+								send_error_message($3, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($1->get_node_type() == Type::FLOATING) {
+								send_error_message($3, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							} else if ($1->get_node_type() == Type::BOOLEAN) {
+								send_error_message($3, ERR_CHAR_TO_BOOL);
+								exit(ERR_CHAR_TO_BOOL);
+							}
+           					}};
 
 expressao_4: expressao_3 { $$ = $1; }
            | expressao_4 '<' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+           				   } else if ($3->get_node_type() == Type::CHARACTER) {
+           				   	if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+           				   }}
            | expressao_4 '>' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }}
            | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           					if ($1->get_node_type() == Type::CHARACTER) {
+							if ($3->get_node_type() == Type::INTEGER) {
+								send_error_message($1, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($3->get_node_type() == Type::FLOATING) {
+								send_error_message($1, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							}
+						   } else if ($3->get_node_type() == Type::CHARACTER) {
+							if ($1->get_node_type() == Type::INTEGER) {
+								send_error_message($3, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($1->get_node_type() == Type::FLOATING) {
+								send_error_message($3, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							}
+						   }}
            | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           					if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
+           					if ($1->get_node_type() == Type::CHARACTER) {
+							if ($3->get_node_type() == Type::INTEGER) {
+								send_error_message($1, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($3->get_node_type() == Type::FLOATING) {
+								send_error_message($1, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							}
+						   } else if ($3->get_node_type() == Type::CHARACTER) {
+							if ($1->get_node_type() == Type::INTEGER) {
+								send_error_message($3, ERR_CHAR_TO_INT);
+								exit(ERR_CHAR_TO_INT);
+							} else if ($1->get_node_type() == Type::FLOATING) {
+								send_error_message($3, ERR_CHAR_TO_FLOAT);
+								exit(ERR_CHAR_TO_FLOAT);
+							}
+						   }};
 
 
 expressao_3: expressao_2 { $$ = $1; }
            | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }}
            | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }};
 
 expressao_2: expressao_1 { $$ = $1; }
            | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }}
            | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }}
            | expressao_2 '%' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER || $3->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}};
+           				   if ($1->get_node_type() == Type::CHARACTER) {
+						if ($3->get_node_type() == Type::INTEGER) {
+							send_error_message($1, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($3->get_node_type() == Type::FLOATING) {
+							send_error_message($1, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   } else if ($3->get_node_type() == Type::CHARACTER) {
+						if ($1->get_node_type() == Type::INTEGER) {
+							send_error_message($3, ERR_CHAR_TO_INT);
+							exit(ERR_CHAR_TO_INT);
+						} else if ($1->get_node_type() == Type::FLOATING) {
+							send_error_message($3, ERR_CHAR_TO_FLOAT);
+							exit(ERR_CHAR_TO_FLOAT);
+						}
+					   }};
 
 expressao_1: operando { $$ = $1; }
            | '(' expressao_7 ')' { $$ = $2; }
            | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type());
-           		       if ($2->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_INT);}}
+           		       if ($2->get_node_type() == Type::CHARACTER) {
+           		       		send_error_message($2, ERR_CHAR_TO_INT);
+           		       		exit(ERR_CHAR_TO_INT);
+           		       	}}
            | '!' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type());
-           		       if ($2->get_node_type() == Type::CHARACTER) {exit(ERR_CHAR_TO_BOOL);}} ;
+           		       if ($2->get_node_type() == Type::CHARACTER) {
+           		       		send_error_message($2, ERR_CHAR_TO_BOOL);
+           		       		exit(ERR_CHAR_TO_BOOL);
+           		       	}} ;
 
 operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
         | literal { $$ = $1; $$->set_node_type($1->get_node_type()); }
@@ -667,7 +900,6 @@ void yyerror (const char *msg) {
 void send_error_message (Node* node, int code) {
     int line_no = node->get_line_no();
     std::string token_val = std::get<std::string>(node->get_token_val());
-    std::cout << token_val << std::endl;
     std::string token_type = token_type_to_string(node->get_token_type());
 
     if (code == ERR_UNDECLARED) {
