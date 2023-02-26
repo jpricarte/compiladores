@@ -139,7 +139,7 @@ lista_id_var_global: id_var_global {$$ = nullptr;}
                    | lista_id_var_global ',' id_var_global {$$ = nullptr;};
 
 id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_token_val())) {
-					send_error_message($1, ERR_DECLARED);
+					                    send_error_message($1, ERR_DECLARED);
                                         exit(ERR_DECLARED);
                                     }
                                         Symbol s{
@@ -482,14 +482,15 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                             };
 
 identificador: TK_IDENTIFICADOR { if (symbol_table_stack.is_not_declared($1->get_token_val())) {
-				      send_error_message($1, ERR_UNDECLARED);
+				                      send_error_message($1, ERR_UNDECLARED);
                                       exit(ERR_UNDECLARED);
                                   }
                                   $$ = $1; // Tem que ser var, se não é erro
                                   auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                  if (s.kind != Kind::VARIABLE) {
-                                  	send_error_message($1, ERR_VARIABLE);
-                                  	exit(ERR_VARIABLE);
+                                  int exit_code = get_bad_usage_err(s.kind, Kind::VARIABLE);
+                                  if (exit_code > 0) {
+                                  	send_error_message($1, exit_code);
+                                  	exit(exit_code);
                                   }
                                   $$->set_node_type(s.type);
                                 } 
@@ -499,9 +500,10 @@ identificador: TK_IDENTIFICADOR { if (symbol_table_stack.is_not_declared($1->get
                     exit(ERR_UNDECLARED);
                 }
                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                if (s.kind != Kind::ARRAY) {
-                	send_error_message($1, ERR_ARRAY);
-                	exit(ERR_ARRAY);
+                int exit_code = get_bad_usage_err(s.kind, Kind::ARRAY);
+                if (exit_code > 0) {
+                    send_error_message($1, exit_code);
+                    exit(exit_code);
                 }
                 $$ = new Node($1->get_line_no(), TokenType::COMPOSED_OPERATOR, TokenVal("[]"));
                 $$->add_child($1);
@@ -519,9 +521,10 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                                 	exit(ERR_UNDECLARED);
                                 }
                                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                if (s.kind != Kind::FUNCTION) {
-                                	send_error_message($1, ERR_FUNCTION);
-                                	exit(ERR_FUNCTION);
+                                int exit_code = get_bad_usage_err(s.kind, Kind::FUNCTION);
+                                if (exit_code > 0) {
+                                    send_error_message($1, exit_code);
+                                    exit(exit_code);
                                 }
                               }
 			 '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($4);};

@@ -55,6 +55,21 @@ int get_char_err(Type to, Type from) {
     }
 }
 
+int get_bad_usage_err(Kind expected, Kind received) {
+    if (expected != received)
+        switch (expected) {
+            case Kind::VARIABLE:
+                return ERR_VARIABLE;
+            case Kind::FUNCTION:
+                return ERR_FUNCTION;
+            case Kind::ARRAY:
+                return ERR_ARRAY;
+            case Kind::LITERAL: // não acontece, apenas para omitir warning
+                return 0;
+        }
+    return 0;
+}
+
 int SymbolTableStack::find_symbol_table(TokenVal key) {
     int i = this->stack.size()-1;
     for (; i>=0; i--) {
