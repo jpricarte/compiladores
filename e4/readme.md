@@ -12,7 +12,7 @@ Lista atualizada dia 25/02 às 20h45.
 ### [Parser](./parser.y)
 
 1. Definir literais na tabela;
-    > Possivelmente não precisamos disso.
+    > Feito
 2. Arrumar push e pop de novas tabelas (atualmente não 
    podemos inserir parâmetros na tabela de função);
     > Feito subindo a definição de bloco de comandos para o corpo da função.
