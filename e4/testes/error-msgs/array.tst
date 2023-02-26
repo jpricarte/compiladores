@@ -1,3 +1,5 @@
 int a[5 ^ 2];
 int b;
-b = a * b;
+int foo() {
+    b = a * b;
+}

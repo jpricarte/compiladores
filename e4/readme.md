@@ -19,6 +19,7 @@ Lista atualizada dia 25/02 às 20h45.
 3. Definir parâmetros na tabela local da função;
     > Feito. Fica trivial com o item 2 feito.
 4. Finalizar mensagens de erro;
+    > Feito
 5. Refatorar o código
 
 ### [Tabela](./table.hh)
