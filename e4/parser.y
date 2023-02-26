@@ -130,6 +130,7 @@ var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr;
                                                         s.size *= get_size_from_type($1->get_node_type());
                                                         symbol_table_stack.emplace_top(pair);
                                                      }
+                                                     delete $1;
                                                    };
 
 lista_id_var_global: id_var_global {$$ = nullptr;}
@@ -184,18 +185,30 @@ funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2-
                                                         $2
                                                     };
                                             symbol_table_stack.insert_top($2->get_token_val(), s);
-                                        } '(' lista_parametros ')' corpo_funcao { $$ = $2; $$->add_child($7);};
+                                            symbol_table_stack.push_new();
+                                        } '(' lista_parametros ')' corpo_funcao { $$ = $2; $$->add_child($7); 
+                                                                                  symbol_table_stack.pop();
+                                                                                  delete $1;
+                                                                                };
 
 lista_parametros: %empty {$$ = nullptr;}
                 | parametro {$$ = nullptr;}
                 | lista_parametros ',' parametro {$$ = nullptr;};
 
-parametro: tipo_primitivo TK_IDENTIFICADOR {$$=nullptr; delete $2;};
+parametro: tipo_primitivo TK_IDENTIFICADOR { $$=nullptr;
+                                             Symbol s {
+                                                $2->get_line_no(),
+                                                Kind::VARIABLE,
+                                                $1->get_node_type(),
+                                                get_size_from_type($1->get_node_type()),
+                                                nullptr
+                                             };
+                                             symbol_table_stack.insert_top($2->get_token_val(), s);
+                                             delete $1;
+                                             delete $2;};
 
-corpo_funcao: bloco_comandos {$$ = $1;};
+corpo_funcao: '{' lista_comandos '}' {$$ = $2;};
 
-/* Bloco de comandos */
-bloco_comandos: '{' { symbol_table_stack.push_new(); } lista_comandos '}' {$$ = $3; symbol_table_stack.pop(); };
 
 lista_comandos: %empty {$$ = nullptr;}
               | comando_simples ';' lista_comandos {
@@ -212,6 +225,9 @@ comando_simples: var_local {$$ = $1;}
                | op_retorno {$$ = $1;}
                | cham_funcao {$$ = $1;}
                | bloco_comandos {$$ = $1;};
+
+/* Bloco de comandos */
+bloco_comandos: {symbol_table_stack.push_new();} '{' lista_comandos '}' {$$ = $3; symbol_table_stack.pop();};
 
 /* Definição de variável local, permitindo apenas literais do tipo correspondente */
 // TODO: fazer a conversão do valor quando mudar o tipo;

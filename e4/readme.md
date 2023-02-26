@@ -14,8 +14,10 @@ Lista atualizada dia 25/02 às 20h45.
 1. Definir literais na tabela;
     > Possivelmente não precisamos disso.
 2. Arrumar push e pop de novas tabelas (atualmente não 
-podemos inserir parâmetros na tabela de função);
+   podemos inserir parâmetros na tabela de função);
+    > Feito subindo a definição de bloco de comandos para o corpo da função.
 3. Definir parâmetros na tabela local da função;
+    > Feito. Fica trivial com o item 2 feito.
 4. Finalizar mensagens de erro;
 5. Refatorar o código
 
