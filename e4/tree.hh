@@ -18,8 +18,6 @@ enum class TokenType {
     LIT_BOOL, // bool
 };
 
-std::string token_type_to_string (TokenType tt);
-
 enum class Type {
     INTEGER,
     FLOATING,
@@ -27,6 +25,8 @@ enum class Type {
     BOOLEAN,
     TYPE_ERROR,
 };
+
+std::string node_type_to_string (Type tt);
 
 typedef std::variant<std::string, int, float, char, bool> TokenVal;
 
@@ -51,6 +51,7 @@ struct Node {
     void add_null_child();
 
     std::string to_string();
+    std::string token_val_to_string();
 
     inline LexicalVal get_lex_val() { return this->lex_val; }
     inline int get_line_no() { return this->lex_val.line_no; }

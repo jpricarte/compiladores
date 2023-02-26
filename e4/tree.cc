@@ -33,20 +33,33 @@ void Node::add_null_child() {
     this->children.push_back(nullptr);
 }
 
-std::string token_type_to_string (TokenType tt) {
+std::string node_type_to_string (Type tt) {
     switch (tt) {
-        case TokenType::IDENTIFIER:
-            return "identificador";
-        case TokenType::LIT_BOOL:
+        case Type::BOOLEAN:
             return "bool";
-        case TokenType::LIT_CHAR:
+        case Type::CHARACTER:
             return "char";
-        case TokenType::LIT_INT:
+        case Type::INTEGER:
             return "int";
-        case TokenType::LIT_FLOAT:
+        case Type::FLOATING:
             return "float";
         default:
-            return "";
+            return "Algo deu errado.";
+    }
+}
+
+string Node::token_val_to_string() {
+    switch (this->node_type) {
+        case Type::INTEGER:
+            return std::to_string(get<int>(this->lex_val.token_val));
+        case Type::FLOATING:
+            return std::to_string(get<float>(this->lex_val.token_val));
+        case Type::CHARACTER:
+            return std::string(&get<char>(this->lex_val.token_val), 1);
+        case Type::BOOLEAN:
+            return std::to_string(get<bool>(this->lex_val.token_val));
+        default:
+            return "Algo deu errado.";
     }
 }
 

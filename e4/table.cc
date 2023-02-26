@@ -16,6 +16,12 @@ Type type_infer (Type symbol_1, Type symbol_2) {
     if (symbol_1 == Type::INTEGER || symbol_2 == Type::INTEGER)
         return Type::INTEGER;
 
+    if (symbol_1 == Type::CHARACTER) {
+        return symbol_2;
+    } else if (symbol_2 == Type::CHARACTER) {
+        return symbol_1;
+    }
+
     else return Type::TYPE_ERROR;
 }
 

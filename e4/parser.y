@@ -477,10 +477,9 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
 atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_child($3); 
                               // verifica tipos
                               int exit_code = get_char_err($1->get_node_type(), $3->get_node_type());
-                              if (exit_code > 0) exit(exit_code);
-                              if ($1->get_node_type() == Type::CHARACTER && $3->gets_node_type() != Type::CHARACTER) {
-                              		send_error_message($3, ERR_X_TO_CHAR);
-                              		exit(ERR_X_TO_CHAR);
+                              if (exit_code > 0) {
+					send_error_message($3, exit_code);
+					exit(exit_code);
                               }
                               $$->set_node_type($1->get_node_type());
                             };
@@ -906,8 +905,10 @@ void yyerror (const char *msg) {
 
 void send_error_message (Node* node, int code) {
     int line_no = node->get_line_no();
-    std::string token_val = std::get<std::string>(node->get_token_val());
-    std::string token_type = token_type_to_string(node->get_token_type());
+    std::string token_val = node->to_string();
+
+//    std::string token_type = token_type_to_string(node->get_token_type());
+    std::string token_type = node_type_to_string(node->get_node_type());
 
     if (code == ERR_UNDECLARED) {
         std::cout << "[ERRO linha " << line_no
