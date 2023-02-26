@@ -607,7 +607,7 @@ static const yytype_int16 yyrline[] =
      500,   504,   507,   516,   522,   523,   527,   528,   533,   534,
      537,   541,   542,   545,   548,   551,   556,   557,   560,   564,
      565,   568,   571,   575,   576,   577,   579,   582,   583,   584,
-     587,   588,   589,   590,   591,   593,   594,   595,   596
+     587,   597,   607,   617,   627,   638,   639,   640,   641
 };
 #endif
 
@@ -2470,60 +2470,105 @@ yyreduce:
 
   case 100: /* literal: TK_LIT_INT  */
 #line 587 "parser.y"
-                    { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::INTEGER); }
-#line 2475 "parser.tab.c"
+                    { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::INTEGER); 
+                      Symbol s {
+                          (yyvsp[0].valor_lexico)->get_line_no(),
+                          Kind::LITERAL,
+                          Type::INTEGER,
+                          get_size_from_type(Type::INTEGER),
+                          (yyvsp[0].valor_lexico)
+                      };
+                      symbol_table_stack.insert_top((yyvsp[0].valor_lexico)->get_token_val(), s);
+                    }
+#line 2484 "parser.tab.c"
     break;
 
   case 101: /* literal: TK_LIT_FLOAT  */
-#line 588 "parser.y"
-                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::FLOATING); }
-#line 2481 "parser.tab.c"
-    break;
-
-  case 102: /* literal: TK_LIT_CHAR  */
-#line 589 "parser.y"
-                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::CHARACTER); }
-#line 2487 "parser.tab.c"
-    break;
-
-  case 103: /* literal: TK_LIT_TRUE  */
-#line 590 "parser.y"
-                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN); }
-#line 2493 "parser.tab.c"
-    break;
-
-  case 104: /* literal: TK_LIT_FALSE  */
-#line 591 "parser.y"
-                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN); }
+#line 597 "parser.y"
+                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::FLOATING);
+                        Symbol s {
+                            (yyvsp[0].valor_lexico)->get_line_no(),
+                            Kind::LITERAL,
+                            Type::FLOATING,
+                            get_size_from_type(Type::FLOATING),
+                            (yyvsp[0].valor_lexico)
+                        };
+                      symbol_table_stack.insert_top((yyvsp[0].valor_lexico)->get_token_val(), s);
+                      }
 #line 2499 "parser.tab.c"
     break;
 
+  case 102: /* literal: TK_LIT_CHAR  */
+#line 607 "parser.y"
+                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::CHARACTER);
+                       Symbol s {
+                            (yyvsp[0].valor_lexico)->get_line_no(),
+                            Kind::LITERAL,
+                            Type::CHARACTER,
+                            get_size_from_type(Type::CHARACTER),
+                            (yyvsp[0].valor_lexico)
+                        };
+                      symbol_table_stack.insert_top((yyvsp[0].valor_lexico)->get_token_val(), s);
+                     }
+#line 2514 "parser.tab.c"
+    break;
+
+  case 103: /* literal: TK_LIT_TRUE  */
+#line 617 "parser.y"
+                     { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN);
+                       Symbol s {
+                            (yyvsp[0].valor_lexico)->get_line_no(),
+                            Kind::LITERAL,
+                            Type::BOOLEAN,
+                            get_size_from_type(Type::BOOLEAN),
+                            (yyvsp[0].valor_lexico)
+                        };
+                      symbol_table_stack.insert_top((yyvsp[0].valor_lexico)->get_token_val(), s);
+                     }
+#line 2529 "parser.tab.c"
+    break;
+
+  case 104: /* literal: TK_LIT_FALSE  */
+#line 627 "parser.y"
+                      { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN);
+                        Symbol s {
+                            (yyvsp[0].valor_lexico)->get_line_no(),
+                            Kind::LITERAL,
+                            Type::BOOLEAN,
+                            get_size_from_type(Type::BOOLEAN),
+                            (yyvsp[0].valor_lexico)
+                        };
+                      symbol_table_stack.insert_top((yyvsp[0].valor_lexico)->get_token_val(), s);
+                      }
+#line 2544 "parser.tab.c"
+    break;
+
   case 105: /* tipo_primitivo: TK_PR_INT  */
-#line 593 "parser.y"
+#line 638 "parser.y"
                           { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::INTEGER); }
-#line 2505 "parser.tab.c"
+#line 2550 "parser.tab.c"
     break;
 
   case 106: /* tipo_primitivo: TK_PR_FLOAT  */
-#line 594 "parser.y"
+#line 639 "parser.y"
                             { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::FLOATING); }
-#line 2511 "parser.tab.c"
+#line 2556 "parser.tab.c"
     break;
 
   case 107: /* tipo_primitivo: TK_PR_CHAR  */
-#line 595 "parser.y"
+#line 640 "parser.y"
                            { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::CHARACTER); }
-#line 2517 "parser.tab.c"
+#line 2562 "parser.tab.c"
     break;
 
   case 108: /* tipo_primitivo: TK_PR_BOOL  */
-#line 596 "parser.y"
+#line 641 "parser.y"
                            { (yyval.valor_lexico) = (yyvsp[0].valor_lexico); (yyval.valor_lexico)->set_node_type(Type::BOOLEAN); }
-#line 2523 "parser.tab.c"
+#line 2568 "parser.tab.c"
     break;
 
 
-#line 2527 "parser.tab.c"
+#line 2572 "parser.tab.c"
 
       default: break;
     }
@@ -2747,7 +2792,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 600 "parser.y"
+#line 645 "parser.y"
 
 /* Declaração da função de erro */
 void yyerror (const char *msg) {
