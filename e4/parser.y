@@ -478,6 +478,10 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                               // verifica tipos
                               int exit_code = get_char_err($1->get_node_type(), $3->get_node_type());
                               if (exit_code > 0) exit(exit_code);
+                              if ($1->get_node_type() == Type::CHARACTER && $3->gets_node_type() != Type::CHARACTER) {
+                              		send_error_message($3, ERR_X_TO_CHAR);
+                              		exit(ERR_X_TO_CHAR);
+                              }
                               $$->set_node_type($1->get_node_type());
                             };
 
