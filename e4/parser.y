@@ -477,7 +477,7 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                               $$->set_node_type($1->get_node_type());
                             };
 
-identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_not_declared($1->get_token_val())) {
+identificador: TK_IDENTIFICADOR { if (symbol_table_stack.is_not_declared($1->get_token_val())) {
                                       exit(ERR_UNDECLARED);
                                   }
                                   $$ = $1; // Tem que ser var, se não é erro
@@ -486,7 +486,7 @@ identificador: TK_IDENTIFICADOR { if (!symbol_table_stack.is_not_declared($1->ge
                                   $$->set_node_type(s.type);
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
-                if (!symbol_table_stack.is_not_declared($1->get_token_val())) {
+                if (symbol_table_stack.is_not_declared($1->get_token_val())) {
                     exit(ERR_UNDECLARED);
                 }
                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
@@ -502,7 +502,7 @@ lista_indices: expressao_7 {$$ = $1;}
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
-                                if (!symbol_table_stack.is_not_declared($1->get_token_val())) exit(ERR_UNDECLARED);
+                                if (symbol_table_stack.is_not_declared($1->get_token_val())) exit(ERR_UNDECLARED);
                                 auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
                                 if (s.kind != Kind::FUNCTION) exit(ERR_FUNCTION);
                               }
@@ -600,11 +600,56 @@ operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
         | cham_funcao { $$ = $1; $$->set_node_type($1->get_node_type()); };
 
 /* regras para deixar o parser menos verboso */
-literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
-       | TK_LIT_FLOAT { $$ = $1; $$->set_node_type(Type::FLOATING); }
-       | TK_LIT_CHAR { $$ = $1; $$->set_node_type(Type::CHARACTER); }
-       | TK_LIT_TRUE { $$ = $1; $$->set_node_type(Type::BOOLEAN); }
-       | TK_LIT_FALSE { $$ = $1; $$->set_node_type(Type::BOOLEAN); };
+literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER); 
+                      Symbol s {
+                          $1->get_line_no(),
+                          Kind::LITERAL,
+                          Type::INTEGER,
+                          get_size_from_type(Type::INTEGER),
+                          $1
+                      };
+                      symbol_table_stack.insert_top($1->get_token_val(), s, true);
+                    }
+       | TK_LIT_FLOAT { $$ = $1; $$->set_node_type(Type::FLOATING);
+                        Symbol s {
+                            $1->get_line_no(),
+                            Kind::LITERAL,
+                            Type::FLOATING,
+                            get_size_from_type(Type::FLOATING),
+                            $1
+                        };
+                      symbol_table_stack.insert_top($1->get_token_val(), s, true);
+                      }
+       | TK_LIT_CHAR { $$ = $1; $$->set_node_type(Type::CHARACTER);
+                       Symbol s {
+                            $1->get_line_no(),
+                            Kind::LITERAL,
+                            Type::CHARACTER,
+                            get_size_from_type(Type::CHARACTER),
+                            $1
+                        };
+                      symbol_table_stack.insert_top($1->get_token_val(), s, true);
+                     }
+       | TK_LIT_TRUE { $$ = $1; $$->set_node_type(Type::BOOLEAN);
+                       Symbol s {
+                            $1->get_line_no(),
+                            Kind::LITERAL,
+                            Type::BOOLEAN,
+                            get_size_from_type(Type::BOOLEAN),
+                            $1
+                        };
+                      symbol_table_stack.insert_top($1->get_token_val(), s, true);
+                     }
+       | TK_LIT_FALSE { $$ = $1; $$->set_node_type(Type::BOOLEAN);
+                        Symbol s {
+                            $1->get_line_no(),
+                            Kind::LITERAL,
+                            Type::BOOLEAN,
+                            get_size_from_type(Type::BOOLEAN),
+                            $1
+                        };
+                      symbol_table_stack.insert_top($1->get_token_val(), s, true);
+                      };
 
 tipo_primitivo: TK_PR_INT { $$ = $1; $$->set_node_type(Type::INTEGER); }
               | TK_PR_FLOAT { $$ = $1; $$->set_node_type(Type::FLOATING); }

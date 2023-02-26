@@ -68,7 +68,10 @@ void SymbolTableStack::emplace_top(std::pair<TokenVal, Symbol> p) {
     this->insert_top(p.first, p.second);
 }
 
-void SymbolTableStack::insert_top(TokenVal lv, Symbol s) {
+void SymbolTableStack::insert_top(TokenVal lv, Symbol s, bool lookup_first) {
+    if (lookup_first && this->top().contains(lv)) {
+        return;
+    }
     this->top().insert({lv, s});
     // printf("inserido\n");
 }

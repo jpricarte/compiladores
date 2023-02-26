@@ -52,7 +52,7 @@ public :
     int find_symbol_table(TokenVal key);
     inline bool is_declared(TokenVal key) { return this->top().contains(key); };
     inline bool is_not_declared(TokenVal key) { return find_symbol_table(key) < 0; };
-    void insert_top(TokenVal lv, Symbol s);
+    void insert_top(TokenVal lv, Symbol s, bool lookup_first = false);
     // Apenas cria o símbolo, não considera no caso de arranjo (tem que ser atualizado)
     void emplace_top(std::pair<TokenVal, Symbol> p);
     Symbol get_first_symbol(TokenVal key); // Retorna copia, não o original, SIDE-EFFECT: exit(ERR_UNDECLARED) se não encontrar
