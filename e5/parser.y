@@ -150,7 +150,8 @@ id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_t
                                         Kind::VARIABLE,
                                         Type::TYPE_ERROR,
                                         1,
-                                        nullptr
+                                        nullptr,
+                                        0
                                     };
                                     var_global_list.push_back(std::make_pair($1->get_token_val(), s));
                                     $$=nullptr; delete $1;
@@ -165,7 +166,8 @@ id_var_global: TK_IDENTIFICADOR {   if (symbol_table_stack.is_declared($1->get_t
                                                               Kind::ARRAY,
                                                               Type::TYPE_ERROR,
                                                               (size_t) array_size,
-                                                              nullptr
+                                                              nullptr,
+                                                              0
                                                           };
                                                           var_global_list.push_back(std::make_pair($1->get_token_val(), s));
                                                           array_size = 0;
@@ -189,7 +191,8 @@ funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2-
                                                         Kind::FUNCTION, 
                                                         $1->get_node_type(), 
                                                         get_size_from_type($1->get_node_type()), 
-                                                        $2
+                                                        $2,
+                                                        0
                                                     };
                                             symbol_table_stack.insert_top($2->get_token_val(), s);
                                             symbol_table_stack.push_new();
@@ -208,7 +211,8 @@ parametro: tipo_primitivo TK_IDENTIFICADOR { $$=nullptr;
                                                 Kind::VARIABLE,
                                                 $1->get_node_type(),
                                                 get_size_from_type($1->get_node_type()),
-                                                nullptr
+                                                nullptr,
+                                                0
                                              };
                                              symbol_table_stack.insert_top($2->get_token_val(), s);
                                              delete $1;
@@ -278,7 +282,8 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                                 Kind::VARIABLE, 
                                                 Type::INTEGER, 
                                                 get_size_from_type(Type::INTEGER), 
-                                                nullptr
+                                                nullptr,
+                                                0
                                             };
                                     symbol_table_stack.insert_top($1->get_token_val(), s);
                                     delete $1;
@@ -296,7 +301,8 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                                                 Kind::VARIABLE, 
                                                                 Type::INTEGER, 
                                                                 get_size_from_type(Type::INTEGER), 
-                                                                $3
+                                                                $3,
+                                                                0
                                                             };
                                                             symbol_table_stack.insert_top($1->get_token_val(), s);
                                                             $$->set_node_type(Type::INTEGER);
@@ -335,7 +341,8 @@ var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                                 Kind::VARIABLE, 
                                                 Type::FLOATING, 
                                                 get_size_from_type(Type::FLOATING), 
-                                                nullptr
+                                                nullptr,
+                                                0
                                             };
                                     symbol_table_stack.insert_top($1->get_token_val(), s);
                                     delete $1;
@@ -354,7 +361,8 @@ var_local_float: TK_IDENTIFICADOR { $$ = nullptr;
                                                                 Kind::VARIABLE, 
                                                                 Type::FLOATING, 
                                                                 get_size_from_type(Type::FLOATING), 
-                                                                $3
+                                                                $3,
+                                                                0
                                                             };
                                                             symbol_table_stack.insert_top($1->get_token_val(), s);
                                                             $$->set_node_type(Type::FLOATING);
@@ -393,7 +401,8 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                             Kind::VARIABLE, 
                                             Type::BOOLEAN, 
                                             get_size_from_type(Type::BOOLEAN), 
-                                            nullptr
+                                            nullptr,
+                                            0
                                         };
                                    symbol_table_stack.insert_top($1->get_token_val(), s);
                                    delete $1;
@@ -412,7 +421,8 @@ var_local_bool: TK_IDENTIFICADOR { $$ = nullptr;
                                                               Kind::VARIABLE, 
                                                               Type::BOOLEAN, 
                                                               get_size_from_type(Type::BOOLEAN), 
-                                                              $3
+                                                              $3,
+                                                              0
                                                           };
                                                           symbol_table_stack.insert_top($1->get_token_val(), s);
                                                           $$->set_node_type(Type::BOOLEAN);
@@ -450,7 +460,8 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                             Kind::VARIABLE, 
                                             Type::CHARACTER, 
                                             get_size_from_type(Type::CHARACTER), 
-                                            nullptr
+                                            nullptr,
+                                            0
                                         };
                                     symbol_table_stack.insert_top($1->get_token_val(), s);
                                     delete $1;
@@ -470,7 +481,8 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                             Kind::VARIABLE, 
                                             Type::CHARACTER, 
                                             get_size_from_type(Type::CHARACTER), 
-                                            $3
+                                            $3,
+                                            0
                                         };
                                         symbol_table_stack.insert_top($1->get_token_val(), s);
               					        $$->set_node_type(Type::CHARACTER);
@@ -936,7 +948,8 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER);
                           Kind::LITERAL,
                           Type::INTEGER,
                           get_size_from_type(Type::INTEGER),
-                          $1
+                          $1,
+                          0
                       };
                       symbol_table_stack.insert_top($1->get_token_val(), s, true);
                     }
@@ -946,7 +959,8 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER);
                             Kind::LITERAL,
                             Type::FLOATING,
                             get_size_from_type(Type::FLOATING),
-                            $1
+                            $1,
+                            0
                         };
                       symbol_table_stack.insert_top($1->get_token_val(), s, true);
                       }
@@ -956,7 +970,8 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER);
                             Kind::LITERAL,
                             Type::CHARACTER,
                             get_size_from_type(Type::CHARACTER),
-                            $1
+                            $1,
+                            0
                         };
                       symbol_table_stack.insert_top($1->get_token_val(), s, true);
                      }
@@ -966,7 +981,8 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER);
                             Kind::LITERAL,
                             Type::BOOLEAN,
                             get_size_from_type(Type::BOOLEAN),
-                            $1
+                            $1, 
+                            0
                         };
                       symbol_table_stack.insert_top($1->get_token_val(), s, true);
                      }
@@ -976,7 +992,8 @@ literal: TK_LIT_INT { $$ = $1; $$->set_node_type(Type::INTEGER);
                             Kind::LITERAL,
                             Type::BOOLEAN,
                             get_size_from_type(Type::BOOLEAN),
-                            $1
+                            $1,
+                            0
                         };
                       symbol_table_stack.insert_top($1->get_token_val(), s, true);
                       };

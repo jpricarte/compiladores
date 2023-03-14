@@ -28,6 +28,7 @@ struct Symbol {
     Type type; // Declarado em tree.hh
     size_t size;
     Node* assoc_node;
+    size_t desloc;
 };
 
 typedef std::map<TokenVal, Symbol> SymbolTable;
@@ -40,11 +41,15 @@ int get_bad_usage_err(Kind expected, Kind received);
 struct SymbolTableStack {;
 private:
     std::vector<SymbolTable> stack {};
+    std::vector<size_t> curr_desloc {};
+
+    size_t set_desloc(Symbol& s);
+
 public :
     // funções para manipular stack;
-    inline void push(SymbolTable& st) { this->stack.push_back(st); };
-    inline void push_new() { this->stack.push_back(SymbolTable{}); };
-    inline void pop() { this->stack.pop_back(); }; // deleta tabela de cima
+    inline void push(SymbolTable& st) { this->stack.push_back(st); curr_desloc.push_back(0); };
+    inline void push_new() { this->stack.push_back(SymbolTable{}); curr_desloc.push_back(0); };
+    inline void pop() { this->stack.pop_back(); curr_desloc.pop_back(); }; // deleta tabela de cima
     inline SymbolTable& top() { return this->stack.back(); }; // retorna a table mais de cima
         /*
      *  - função para buscar simbolo na pilha: varre a pilha de cima para baixo procurando um simbolo

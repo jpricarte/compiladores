@@ -93,7 +93,9 @@ void SymbolTableStack::insert_top(TokenVal lv, Symbol s, bool lookup_first) {
     if (lookup_first && this->top().contains(lv)) {
         return;
     }
+    this->set_desloc(s);
     this->top().insert({lv, s});
+
     // printf("inserido\n");
 }
 
@@ -103,4 +105,11 @@ Symbol SymbolTableStack::get_first_symbol(TokenVal key) {
         return this->stack[index][key];
     }
     else exit(ERR_UNDECLARED);
+}
+
+size_t SymbolTableStack::set_desloc(Symbol& s) {
+    // Sera o deslocamento na pilha atual começando em 0 * tam do simbolo
+    s.desloc = this->curr_desloc[this->stack.size()-1];
+    this->curr_desloc[this->stack.size()-1] += s.size;
+    return s.desloc;
 }
