@@ -727,64 +727,84 @@ expressao_4: expressao_3 { $$ = $1; }
 
 expressao_3: expressao_2 { $$ = $1; }
            | expressao_3 '+' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER) {
-						if ($3->get_node_type() == Type::INTEGER) {
-							send_error_message($1, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($3->get_node_type() == Type::FLOATING) {
-							send_error_message($1, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   } else if ($3->get_node_type() == Type::CHARACTER) {
-						if ($1->get_node_type() == Type::INTEGER) {
-							send_error_message($3, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($1->get_node_type() == Type::FLOATING) {
-							send_error_message($3, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   }}
+           				    $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+           				    if ($1->get_node_type() == Type::CHARACTER) {
+                                if ($3->get_node_type() == Type::INTEGER) {
+                                    send_error_message($1, ERR_CHAR_TO_INT);
+                                    exit(ERR_CHAR_TO_INT);
+                                } else if ($3->get_node_type() == Type::FLOATING) {
+                                    send_error_message($1, ERR_CHAR_TO_FLOAT);
+                                    exit(ERR_CHAR_TO_FLOAT);
+                                }
+                            } else if ($3->get_node_type() == Type::CHARACTER) {
+                                if ($1->get_node_type() == Type::INTEGER) {
+                                    send_error_message($3, ERR_CHAR_TO_INT);
+                                    exit(ERR_CHAR_TO_INT);
+                                } else if ($1->get_node_type() == Type::FLOATING) {
+                                    send_error_message($3, ERR_CHAR_TO_FLOAT);
+                                    exit(ERR_CHAR_TO_FLOAT);
+                                }
+                            }
+                            $$->code_element = CodeElement{};
+                            $$->code_element.code = $1->code_element.code;
+                            $$->code_element.copy_code($3->code_element.code);
+                            $$->code_element.temporary = get_new_register();
+                            $$->code_element.code.push_back(Command(Instruct::ADD, $1->code_element.temporary, $3->code_element.temporary, $$->code_element.temporary, NO_REG));
+
+                        }
            | expressao_3 '-' expressao_2 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER) {
-						if ($3->get_node_type() == Type::INTEGER) {
-							send_error_message($1, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($3->get_node_type() == Type::FLOATING) {
-							send_error_message($1, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   } else if ($3->get_node_type() == Type::CHARACTER) {
-						if ($1->get_node_type() == Type::INTEGER) {
-							send_error_message($3, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($1->get_node_type() == Type::FLOATING) {
-							send_error_message($3, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   }};
+                                $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+                                if ($1->get_node_type() == Type::CHARACTER) {
+                                    if ($3->get_node_type() == Type::INTEGER) {
+                                        send_error_message($1, ERR_CHAR_TO_INT);
+                                        exit(ERR_CHAR_TO_INT);
+                                    } else if ($3->get_node_type() == Type::FLOATING) {
+                                        send_error_message($1, ERR_CHAR_TO_FLOAT);
+                                        exit(ERR_CHAR_TO_FLOAT);
+                                    }
+                                } else if ($3->get_node_type() == Type::CHARACTER) {
+                                    if ($1->get_node_type() == Type::INTEGER) {
+                                        send_error_message($3, ERR_CHAR_TO_INT);
+                                        exit(ERR_CHAR_TO_INT);
+                                    } else if ($1->get_node_type() == Type::FLOATING) {
+                                        send_error_message($3, ERR_CHAR_TO_FLOAT);
+                                        exit(ERR_CHAR_TO_FLOAT);
+                                    }
+                                }
+                                $$->code_element = CodeElement{};
+                                $$->code_element.code = $1->code_element.code;
+                                $$->code_element.copy_code($3->code_element.code);
+                                $$->code_element.temporary = get_new_register();
+                                $$->code_element.code.push_back(Command(Instruct::SUB, $1->code_element.temporary, $3->code_element.temporary, $$->code_element.temporary, NO_REG));
+
+                            };
 
 expressao_2: expressao_1 { $$ = $1; }
            | expressao_2 '*' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
-           				   $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
-           				   if ($1->get_node_type() == Type::CHARACTER) {
-						if ($3->get_node_type() == Type::INTEGER) {
-							send_error_message($1, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($3->get_node_type() == Type::FLOATING) {
-							send_error_message($1, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   } else if ($3->get_node_type() == Type::CHARACTER) {
-						if ($1->get_node_type() == Type::INTEGER) {
-							send_error_message($3, ERR_CHAR_TO_INT);
-							exit(ERR_CHAR_TO_INT);
-						} else if ($1->get_node_type() == Type::FLOATING) {
-							send_error_message($3, ERR_CHAR_TO_FLOAT);
-							exit(ERR_CHAR_TO_FLOAT);
-						}
-					   }}
+                            $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
+                            if ($1->get_node_type() == Type::CHARACTER) {
+                                if ($3->get_node_type() == Type::INTEGER) {
+                                    send_error_message($1, ERR_CHAR_TO_INT);
+                                    exit(ERR_CHAR_TO_INT);
+                                } else if ($3->get_node_type() == Type::FLOATING) {
+                                    send_error_message($1, ERR_CHAR_TO_FLOAT);
+                                    exit(ERR_CHAR_TO_FLOAT);
+                                }
+                            } else if ($3->get_node_type() == Type::CHARACTER) {
+                                if ($1->get_node_type() == Type::INTEGER) {
+                                    send_error_message($3, ERR_CHAR_TO_INT);
+                                    exit(ERR_CHAR_TO_INT);
+                                } else if ($1->get_node_type() == Type::FLOATING) {
+                                    send_error_message($3, ERR_CHAR_TO_FLOAT);
+                                    exit(ERR_CHAR_TO_FLOAT);
+                                }
+                            }
+                            $$->code_element = CodeElement{};
+                            $$->code_element.code = $1->code_element.code;
+                            $$->code_element.copy_code($3->code_element.code);
+                            $$->code_element.temporary = get_new_register();
+                            $$->code_element.code.push_back(Command(Instruct::MULT, $1->code_element.temporary, $3->code_element.temporary, $$->code_element.temporary, NO_REG));
+                       }
            | expressao_2 '/' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
                             $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
                             if ($1->get_node_type() == Type::CHARACTER) {
@@ -808,7 +828,7 @@ expressao_2: expressao_1 { $$ = $1; }
                             $$->code_element.code = $1->code_element.code;
                             $$->code_element.copy_code($3->code_element.code);
                             $$->code_element.temporary = get_new_register();
-                            $$->code_element.code.push_back(Command(Instruct::DIV, $1->code_element.temporary, $3->code_element.temporary, $$->code_element.temporary));
+                            $$->code_element.code.push_back(Command(Instruct::DIV, $1->code_element.temporary, $3->code_element.temporary, $$->code_element.temporary, NO_REG));
                         }
            | expressao_2 '%' expressao_1 { $$ = $2; $$->add_child($1); $$->add_child($3);
            				    $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
@@ -856,8 +876,9 @@ operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
         | literal { $$ = $1; $$->set_node_type($1->get_node_type());
                     CodeElement elem{};
                     elem.temporary = ILOC_Code::get_new_register();
-                    elem.code.push_back(Command{Instruct::LOAD_I, elem.temporary, NO_REG, NO_REG});
-                    }
+                    elem.code.push_back(Command{Instruct::LOAD_I, std::get<int>($$->get_token_val()), NO_REG, elem.temporary, NO_REG});
+                    $$->code_element = elem;
+                }
         | cham_funcao { $$ = $1; $$->set_node_type($1->get_node_type()); };
 
 /* regras para deixar o parser menos verboso */
