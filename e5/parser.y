@@ -4,6 +4,7 @@
 #include <map>
 #include "table.hh"
 
+
 extern int get_line_number();
 extern void* arvore;
 
@@ -21,7 +22,6 @@ int array_size=0;
 
 %code requires {
     #include <memory>
-    #include "tree.hh"
     #include "table.hh"
 }
 
@@ -835,7 +835,8 @@ expressao_1: operando { $$ = $1; }
            		       	}} ;
 
 operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
-        | literal { $$ = $1; $$->set_node_type($1->get_node_type()); }
+        | literal { $$ = $1; $$->set_node_type($1->get_node_type());
+                    ILOC_Code::CodeElement elem{};}
         | cham_funcao { $$ = $1; $$->set_node_type($1->get_node_type()); };
 
 /* regras para deixar o parser menos verboso */

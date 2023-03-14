@@ -45,13 +45,12 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 22 "parser.y"
+#line 23 "parser.y"
 
     #include <memory>
-    #include "tree.hh"
     #include "table.hh"
 
-#line 55 "parser.tab.h"
+#line 54 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -99,7 +98,7 @@ union YYSTYPE
 
     Node* valor_lexico;
 
-#line 103 "parser.tab.h"
+#line 102 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

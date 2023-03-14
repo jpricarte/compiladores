@@ -4,6 +4,8 @@
 #include <variant>
 #include <string>
 #include <memory>
+#include "iloc.hh"
+
 
 const std::vector<char> useless_chars {',', ';', '(', ')', '{', '}', '[', ']'};
 
@@ -41,6 +43,7 @@ struct Node {
     std::vector<std::shared_ptr<Node>> children;
     bool is_func_call = false;
     Type node_type;
+    ILOC_Code::CodeElement code_element;
 
     Node(LexicalVal lex_val);
     Node(int line_no, TokenType token_type, TokenVal token_val);
