@@ -37,3 +37,9 @@ std::string Command::to_string() {
 
     return oss.str();
 }
+
+void CodeElement::copy_code(std::vector<ILOC_Code::Command> from) {
+    for (auto& e : from) {
+        this->code.push_back(e);
+    }
+}

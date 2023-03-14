@@ -45,12 +45,14 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 23 "parser.y"
+#line 24 "parser.y"
 
     #include <memory>
     #include "table.hh"
+    #include "iloc.hh"
+    using namespace ILOC_Code;
 
-#line 54 "parser.tab.h"
+#line 56 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -94,11 +96,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 28 "parser.y"
+#line 31 "parser.y"
 
     Node* valor_lexico;
 
-#line 102 "parser.tab.h"
+#line 104 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

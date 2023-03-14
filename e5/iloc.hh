@@ -156,6 +156,8 @@ namespace ILOC_Code {
         ILOC_Code::reg_t temporary;
         ILOC_Code::lab_t label_true;
         ILOC_Code::lab_t label_false;
+
+        void copy_code(std::vector<ILOC_Code::Command> from);
     };
     
     /* Talvez colocar algo relacionado a memoria aqui, mas dessociei da aula nesse momento */
