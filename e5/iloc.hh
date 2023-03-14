@@ -19,7 +19,7 @@ namespace ILOC_Code {
     const ILOC_Code::reg_t RBSS = 3;
 	static ILOC_Code::reg_t counter = 4;
 	
-	ILOC_Code::reg_t get_new_register() {
+	inline ILOC_Code::reg_t get_new_register() {
 	    // Retorna o valor atual e atualiza
 	    return counter++;
 	}
@@ -95,7 +95,7 @@ namespace ILOC_Code {
     const ILOC_Code::lab_t NO_LABEL = 0;
 	static ILOC_Code::lab_t label_id = 1;
 	
-	ILOC_Code::lab_t get_new_label() {
+	inline ILOC_Code::lab_t get_new_label() {
 	    // Retorna o valor atual e atualiza
 	    return label_id++;
 	}
