@@ -570,7 +570,7 @@ con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->
          						   }};
 
 /* Expressão (nivel de precendencia indicado no nome da regra) */
-
+// TODO: Inserir casos base das expressões
 expressao_7: expressao_6 { $$ = $1; }
            | expressao_7 TK_OC_OR expressao_6 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
