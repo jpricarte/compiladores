@@ -1,7 +1,5 @@
 #include "iloc.hh"
-#include <string>
 #include <iostream>
-#include <vector>
 #include <algorithm>
 
 using namespace ILOC_Code;
@@ -54,7 +52,7 @@ std::string Command::to_string() {
         if (is_in(this->instruct, RCRx))
             oss << " r" << this->op1;
         if (is_in(this->instruct, CxRx))
-            oss << " c" << this->op1;
+            oss << " " << this->op1;
         if (is_in(this->instruct, RxRx))
             oss << " r" << this->op1;
         if (is_in(this->instruct, RxRC))
@@ -69,7 +67,7 @@ std::string Command::to_string() {
         if (is_in(this->instruct, RRRx))
             oss << ", r" << this->op2;
         if (is_in(this->instruct, RCRx))
-            oss << ", c" << this->op2;
+            oss << ", " << this->op2;
     }
 
     oss << " =>";
@@ -95,13 +93,14 @@ std::string Command::to_string() {
 
     if (this->op4) {
         if (is_in(this->instruct, RxRC))
-            oss << ", c" << this->op4 << std::endl;
+            oss << ", " << this->op4;
         if (is_in(this->instruct, RxRR))
-            oss << ", r" << this->op4 << std::endl;
+            oss << ", r" << this->op4;
         if (is_in(this->instruct, RxLL))
-            oss << ", l" << this->op4 << std::endl;
+            oss << ", l" << this->op4;
     }
 
+    oss << std::endl;
     std::cout << oss.str();
 
     return oss.str();
