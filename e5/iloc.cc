@@ -5,11 +5,13 @@
 using namespace ILOC_Code;
 
 
-Command::Command(Instruct instruct) {
+Command::Command(ILOC_Code::lab_t label, Instruct instruct) {
+    this->label = label;
     this->instruct = instruct;
     this->op1 = NO_REG;
     this->op2 = NO_REG;
     this->op3 = NO_REG;
+    this->op4 = NO_REG;
 }
 
 Command::Command(Instruct instruct, reg_t op1, reg_t op2, reg_t op3, reg_t op4) {
@@ -27,7 +29,9 @@ std::string Command::to_string() {
     std::ostringstream oss;
 
     oss << instruct_to_string[this->instruct];
-    if (this->op1) {oss << " " << this->op1;}
+    if (this->op1) {
+        oss << " " << this->op1;
+    }
     if (this->op2) {oss << ", " << this->op2;}
     oss << " => ";
     oss << this->op3;
@@ -36,10 +40,4 @@ std::string Command::to_string() {
     std::cout << oss.str();
 
     return oss.str();
-}
-
-void CodeElement::copy_code(std::vector<ILOC_Code::Command> from) {
-    for (auto& e : from) {
-        this->code.push_back(e);
-    }
 }

@@ -77,57 +77,60 @@ namespace ILOC_Code {
 	};
 
     inline static const char *instruct_to_string[] ={
-            "NOP",
-            "ADD",
-            "SUB",
-            "MULT",
-            "DIV",
-            "ADD_I",
-            "SUB_I",
-            "RSUB_I",
-            "MULT_I",
-            "DIV_I",
-            "RDIV_I",
-            "LSHIFT",
-            "LSHIFT_I",
-            "RSHIFT",
-            "RSHIFT_I",
-            "AND",
-            "AND_I",
-            "OR",
-            "OR_I",
-            "XOR",
-            "XOR_I",
-            "LOAD_I",
-            "LOAD",
-            "LOAD_AI",
-            "LOAD_A0",
-            "CLOAD",
-            "CLOAD_AI",
-            "CLOAD_A0",
-            "STORE",
-            "STORE_AI",
-            "STORE_AO",
-            "CSTORE",
-            "CSTORE_AI",
-            "CSTORE_AO",
-            "I2I",
-            "C2C",
-            "C2I",
-            "I2C",
+            "nop",
+            "add",
+            "sub",
+            "mult",
+            "div",
+            "addI",
+            "subI",
+            "rsubI",
+            "multI",
+            "divI",
+            "rdivI",
+            "lshift",
+            "lshiftI",
+            "rshift",
+            "rshiftI",
+            "and",
+            "andI",
+            "or",
+            "orI",
+            "xor",
+            "xorI",
+            "loadI",
+            "load",
+            "loadAI",
+            "loadA0",
+            "cload",
+            "cloadAI",
+            "cloadA0",
+            "store",
+            "storeAI",
+            "storeAO",
+            "cstore",
+            "cstoreAI",
+            "cstoreAO",
+            "i2i",
+            "c2c",
+            "c2i",
+            "i2c",
             // Controle de fluxo
-            "JUMP_I",
-            "JUMP",
-            "CBR",
-            "CMP_LT",
-            "CMP_LE",
-            "CMP_EQ",
-            "CMP_GE",
-            "CMP_GT",
-            "CMP_NE"
+            "jumpI",
+            "jump",
+            "cbr",
+            "cmp_LT",
+            "cmp_LE",
+            "cmp_EQ",
+            "cmp_GE",
+            "cmp_GT",
+            "cmp_NE"
     };
 
     struct Command {
+        // INST [r1|c] [r2|c] => <rd|L> [L]
+        // inst   op1   op2       op3   op4
+        ILOC_Code::lab_t label;
         ILOC_Code::Instruct instruct;
         ILOC_Code::reg_t op1;
         ILOC_Code::reg_t op2;
@@ -135,7 +138,7 @@ namespace ILOC_Code {
         ILOC_Code::reg_t op4;
 
         // Inicia todos os operadores em 0
-        Command(ILOC_Code::Instruct instruct);
+        Command(ILOC_Code::lab_t label, ILOC_Code::Instruct instruct);
         // Iniciar operador como 0 caso não utilize
         Command(ILOC_Code::Instruct instruct, ILOC_Code::reg_t op1, ILOC_Code::reg_t op2, ILOC_Code::reg_t op3, ILOC_Code::reg_t op4);
         // vai fazer uma string como: INST [r1|c] [r2|c] => <rd|L> [L]
