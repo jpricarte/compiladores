@@ -108,6 +108,7 @@ int array_size=0;
 %%
 
 programa: { symbol_table_stack.push_new(); } lista_elem {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
+// programa: { symbol_table_stack.push_new(); } expressao_7 {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
 
 lista_elem: %empty {$$ = nullptr;}
           | elemento lista_elem {
@@ -499,18 +500,21 @@ atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_
                               $$->set_node_type($1->get_node_type());
                             };
 
-identificador: TK_IDENTIFICADOR { if (symbol_table_stack.is_not_declared($1->get_token_val())) {
-				                      send_error_message($1, ERR_UNDECLARED);
-                                      exit(ERR_UNDECLARED);
-                                  }
-                                  $$ = $1; // Tem que ser var, se não é erro
-                                  auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                  int exit_code = get_bad_usage_err(s.kind, Kind::VARIABLE);
-                                  if (exit_code > 0) {
-                                  	send_error_message($1, exit_code);
-                                  	exit(exit_code);
-                                  }
-                                  $$->set_node_type(s.type);
+identificador: TK_IDENTIFICADOR { 
+                                    if (symbol_table_stack.is_not_declared($1->get_token_val())) {
+                                        send_error_message($1, ERR_UNDECLARED);
+                                        exit(ERR_UNDECLARED);
+                                    }
+                                    $$ = $1; // Tem que ser var, se não é erro
+                                    auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
+                                    int exit_code = get_bad_usage_err(s.kind, Kind::VARIABLE);
+                                    if (exit_code > 0) {
+                                        send_error_message($1, exit_code);
+                                        exit(exit_code);
+                                    }
+                                    $$->set_node_type(s.type);
+
+                                    // Se for global, pega do 
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
                 if (symbol_table_stack.is_not_declared($1->get_token_val())) {

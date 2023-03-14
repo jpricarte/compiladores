@@ -13,7 +13,10 @@ int get_line_number() {
 void exporta(void* arvore) {
     if (arvore != nullptr) {
         auto arv = std::shared_ptr<Node>((Node*) arvore);
-        print_arvore(arv);
+        // print_arvore(arv);
+        for (auto command : arv->code_element.code) {
+            command.to_string();
+        }
     }
 }
 
