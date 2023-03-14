@@ -127,6 +127,15 @@ namespace ILOC_Code {
             "cmp_NE"
     };
 
+    using lab_t = unsigned int;
+    const ILOC_Code::lab_t NO_LABEL = 0;
+    static ILOC_Code::lab_t label_id = 1;
+
+    inline ILOC_Code::lab_t get_new_label() {
+        // Retorna o valor atual e atualiza
+        return label_id++;
+    }
+
     struct Command {
         // INST [r1|c] [r2|c] => <rd|L> [L]
         // inst   op1   op2       op3   op4
@@ -144,15 +153,6 @@ namespace ILOC_Code {
         // vai fazer uma string como: INST [r1|c] [r2|c] => <rd|L> [L]
         std::string to_string();
     };
-
-    using lab_t = unsigned int;
-    const ILOC_Code::lab_t NO_LABEL = 0;
-	static ILOC_Code::lab_t label_id = 1;
-	
-	inline ILOC_Code::lab_t get_new_label() {
-	    // Retorna o valor atual e atualiza
-	    return label_id++;
-	}
 
     struct CodeElement {
         std::vector<ILOC_Code::Command> code;
