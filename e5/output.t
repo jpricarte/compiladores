@@ -1,4 +1,5 @@
 jumpI => L3
+store rfp => rsp
 L1: nop
 loadI 5 => r4
 addI rfp, 8 => r5

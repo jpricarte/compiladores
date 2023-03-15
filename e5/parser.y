@@ -111,6 +111,8 @@ int array_size=0;
 
 programa: { symbol_table_stack.push_new(); } lista_elem {
             $$ = $2;
+            $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::STORE, RFP, NO_REG, RSP, NO_REG});
+            // TODO: Fazer como chamada de função, para iniciar a tabela
             $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::JUMP_I, NO_REG, NO_REG, main_label, NO_REG});
             arvore = $$;
             symbol_table_stack.pop();
@@ -128,9 +130,7 @@ lista_elem: %empty { $$ = nullptr; }
                 }
             };
 
-// AQUI
 elemento: var_global {$$ = $1; var_global_list.clear();}
-        // | lista_comandos {$$=$1;}
         | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
@@ -631,6 +631,7 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                         7. Salva o antigo fp na pilha (como vínculo dinâmico)
                         8. Aloca variáveis locais
                     */
+
                     param_regs.pop_back();
                 };
 
