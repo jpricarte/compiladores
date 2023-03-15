@@ -533,7 +533,7 @@ identificador: TK_IDENTIFICADOR {
                                     if (table_id == 0) {
                                         $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RBSS, s.desloc, $$->code_element.temporary, NO_REG));
                                     } else {
-                                        $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RSP, s.desloc, $$->code_element.temporary, NO_REG));
+                                        $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RFP, s.desloc, $$->code_element.temporary, NO_REG));
                                     }
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro

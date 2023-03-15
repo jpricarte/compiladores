@@ -8,7 +8,7 @@ loadI 5 => r8
 cmp_GE r7, r8 => r9
 cbr r9 => L2, L3
 L2: nop
-addI rsp, 0 => r10
+addI rfp, 0 => r10
 loadI 8 => r11
 store r11 => r10
 addI rbss, 0 => r12
