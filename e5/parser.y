@@ -581,7 +581,8 @@ con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->
 								   if ($3->get_node_type() == Type::CHARACTER) {
 								   	send_error_message($3, ERR_CHAR_TO_BOOL);
 								   	exit(ERR_CHAR_TO_BOOL);
-								   }}
+								   }
+								    }
          | TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos TK_PR_ELSE bloco_comandos 
          {
             $$ = $1;
@@ -593,6 +594,18 @@ con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->
             	send_error_message($3, ERR_CHAR_TO_BOOL);
             	exit(ERR_CHAR_TO_BOOL);
             }
+
+	    CodeElement code_elem = CodeElement{};
+	    code_elem.label_true = get_new_label();
+	    code_elem.label_false = get_new_label();
+	    code_elem.copy_code($3->code_element.code);
+	    code_elem.code.push_back(Command(Instruct::CBR, $3->code_element.temporary, NO_REG, code_elem.label_true, code_elem.label_false));
+	    code_elem.code.push_back(Command(code_elem.label_true, Instruct::NOP));
+	    code_elem.copy_code($6->code_element.code);
+	    code_elem.code.push_back(Command(code_elem.label_false, Instruct::NOP));
+	    code_elem.copy_code($8->code_element.code);
+	    $$->code_element = code_elem;
+
          }
          | TK_PR_WHILE '(' expressao_7 ')' bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($5);
          						   $$->set_node_type($3->get_node_type());
