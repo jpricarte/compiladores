@@ -120,7 +120,9 @@ lista_elem: %empty {$$ = nullptr;}
             }
         };
 
+// AQUI
 elemento: var_global {$$ = $1; var_global_list.clear();}
+        | bloco_comandos {$$=$1;}
         | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
@@ -490,15 +492,21 @@ var_local_char: TK_IDENTIFICADOR {  if (symbol_table_stack.is_declared($1->get_t
                                     };
 
 /* Comando de Atribuição */
-atribuicao: identificador '=' expressao_7 { $$ = $2; $$->add_child($1); $$->add_child($3); 
-                              // verifica tipos
-                              int exit_code = get_char_err($1->get_node_type(), $3->get_node_type());
-                              if (exit_code > 0) {
-					send_error_message($3, exit_code);
-					exit(exit_code);
-                              }
-                              $$->set_node_type($1->get_node_type());
-                            };
+atribuicao: identificador '=' expressao_7 { 
+                            $$ = $2; $$->add_child($1); $$->add_child($3); 
+                            // verifica tipos
+                            int exit_code = get_char_err($1->get_node_type(), $3->get_node_type());
+                            if (exit_code > 0) {
+					            send_error_message($3, exit_code);
+					            exit(exit_code);
+                            }
+                            $$->set_node_type($1->get_node_type());
+                            auto dest = $1->code_element.temporary;
+                            auto value = $3->code_element.temporary;
+                            $$->code_element.code = $1->code_element.code;
+                            $$->code_element.copy_code($3->code_element.code);
+                            $$->code_element.code.push_back(Command{Instruct::STORE, value, NO_REG, dest, NO_REG});
+                        };
 
 identificador: TK_IDENTIFICADOR { 
                                     if (symbol_table_stack.is_not_declared($1->get_token_val())) {
@@ -514,7 +522,15 @@ identificador: TK_IDENTIFICADOR {
                                     }
                                     $$->set_node_type(s.type);
 
-                                    // Se for global, pega do 
+                                    $$->code_element = CodeElement{};
+                                    $$->code_element.temporary = get_new_register();
+                                    // Retorna 0 caso global, outro caso local
+                                    auto table_id = symbol_table_stack.find_symbol_table($1->get_token_val());
+                                    if (table_id == 0) {
+                                        $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RBSS, s.desloc, $$->code_element.temporary, NO_REG));
+                                    } else {
+                                        $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RSP, s.desloc, $$->code_element.temporary, NO_REG));
+                                    }
                                 } 
              | TK_IDENTIFICADOR '[' lista_indices ']' { // Tem que ser Arranjo, se não é erro
                 if (symbol_table_stack.is_not_declared($1->get_token_val())) {
