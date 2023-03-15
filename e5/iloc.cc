@@ -148,11 +148,11 @@ std::string Command::to_string() {
     if (is_in(this->instruct, RxRR))
         oss << " r" << get_reg_name(this->op3);
     if (is_in(this->instruct, xxLx))
-        oss << " l" << op3;
+        oss << " L" << op3;
     if (is_in(this->instruct, xxRx))
         oss << " r" << get_reg_name(this->op3);
     if (is_in(this->instruct, RxLL))
-        oss << " l" << op3;
+        oss << " L" << op3;
 
     if (this->op4 >= 0) {
         if (is_in(this->instruct, RxRC))
@@ -160,7 +160,7 @@ std::string Command::to_string() {
         if (is_in(this->instruct, RxRR))
             oss << ", r" << get_reg_name(this->op4);
         if (is_in(this->instruct, RxLL))
-            oss << ", l" << op4;
+            oss << ", L" << op4;
     }
 
     oss << std::endl;
