@@ -15,9 +15,9 @@
 namespace ILOC_Code {
     using reg_t = unsigned int;
     const ILOC_Code::reg_t NO_REG = 0;
-    const ILOC_Code::reg_t RFP = 1;
-    const ILOC_Code::reg_t RSP = 2;
-    const ILOC_Code::reg_t RBSS = 3;
+    const ILOC_Code::reg_t RBSS = 1;
+    const ILOC_Code::reg_t RFP = 2;
+    const ILOC_Code::reg_t RSP = 3;
 	static ILOC_Code::reg_t counter = 4;
 	
 	inline ILOC_Code::reg_t get_new_register() {
