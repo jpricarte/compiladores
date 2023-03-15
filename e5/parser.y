@@ -121,8 +121,8 @@ lista_elem: %empty {$$ = nullptr;}
 
 // AQUI
 elemento: var_global {$$ = $1; var_global_list.clear();}
-        | lista_comandos {$$=$1;}
-        // | funcao {$$ = $1;};
+        // | lista_comandos {$$=$1;}
+        | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr; 
@@ -184,41 +184,55 @@ lista_dimensoes: TK_LIT_INT { array_size = get<int>($1->get_token_val());
                                                 };
 
 /* Definição de funções */
-funcao: tipo_primitivo TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($2->get_token_val())) {
-					      send_error_message($2, ERR_DECLARED);
-                                              exit(ERR_DECLARED);
-                                          }
-                                            Symbol s{
-                                                        $2->get_line_no(), 
-                                                        Kind::FUNCTION, 
-                                                        $1->get_node_type(), 
-                                                        get_size_from_type($1->get_node_type()), 
-                                                        $2,
-                                                        0
-                                                    };
-                                            symbol_table_stack.insert_top($2->get_token_val(), s);
-                                            symbol_table_stack.push_new();
-                                        } '(' lista_parametros ')' corpo_funcao { $$ = $2; $$->add_child($7); 
-                                                                                  symbol_table_stack.pop();
-                                                                                  delete $1;
-                                                                                };
+
+funcao: tipo_primitivo TK_IDENTIFICADOR { 
+                if (symbol_table_stack.is_declared($2->get_token_val())) {
+                    send_error_message($2, ERR_DECLARED);
+                    exit(ERR_DECLARED);
+                }
+                Symbol s{
+                    $2->get_line_no(), 
+                    Kind::FUNCTION, 
+                    $1->get_node_type(), 
+                    get_size_from_type($1->get_node_type()), 
+                    $2,
+                    0
+                };
+                symbol_table_stack.insert_top($2->get_token_val(), s);
+                symbol_table_stack.push_new();
+            } 
+        '(' lista_parametros
+        ')' corpo_funcao { 
+                $$ = $2; $$->add_child($7);
+                lab_t func_label = get_new_label();
+                if ($7 != nullptr) {
+                    $$->code_element.copy_code($7->code_element.code);
+                }
+                /* Copia o código de criação de parametros, end de retorno e criação de frame (ajustar desloc) */
+                /* Adiciona o código do corpo da função */
+                /* Adiciona código de retorno de função (?) */
+                symbol_table_stack.pop($2->get_token_val());
+                delete $1;
+            };
 
 lista_parametros: %empty {$$ = nullptr;}
                 | parametro {$$ = nullptr;}
                 | lista_parametros ',' parametro {$$ = nullptr;};
 
-parametro: tipo_primitivo TK_IDENTIFICADOR { $$=nullptr;
-                                             Symbol s {
-                                                $2->get_line_no(),
-                                                Kind::VARIABLE,
-                                                $1->get_node_type(),
-                                                get_size_from_type($1->get_node_type()),
-                                                nullptr,
-                                                0
-                                             };
-                                             symbol_table_stack.insert_top($2->get_token_val(), s);
-                                             delete $1;
-                                             delete $2;};
+parametro: tipo_primitivo TK_IDENTIFICADOR  { 
+                    $$=nullptr;
+                    Symbol s {
+                        $2->get_line_no(),
+                        Kind::VARIABLE,
+                        $1->get_node_type(),
+                        get_size_from_type($1->get_node_type()),
+                        nullptr,
+                        0
+                    };
+                    symbol_table_stack.insert_top($2->get_token_val(), s);
+                    delete $1;
+                    delete $2;
+                };
 
 corpo_funcao: '{' lista_comandos '}' {$$ = $2;};
 
@@ -258,8 +272,7 @@ var_local: TK_PR_INT lista_var_local_int {$$ = $2;}
 
 /* inteiro */
 lista_var_local_int: %empty {$$ = nullptr;}
-                   | var_local_int lista_var_local_int
-                   {
+                   | var_local_int lista_var_local_int {
                         if ($1 != nullptr) {
                             $$ = $1; 
                             $$->add_child($2);
@@ -274,6 +287,9 @@ lista_var_local_int: %empty {$$ = nullptr;}
                             $$->add_child($3);
                         } else {
                             $$ = $3;
+                            auto other_code = $$->code_element.code;
+                            $$->code_element.code = $3->code_element.code;
+                            $$->code_element.copy_code(other_code);
                         }
                     };
 
@@ -295,25 +311,41 @@ var_local_int: TK_IDENTIFICADOR { $$ = nullptr;
                                     symbol_table_stack.insert_top($1->get_token_val(), s);
                                     delete $1;
                                   }
-             | TK_IDENTIFICADOR { if (symbol_table_stack.is_declared($1->get_token_val())) {
+             | TK_IDENTIFICADOR { 
+                    if (symbol_table_stack.is_declared($1->get_token_val())) {
 				        send_error_message($1, ERR_DECLARED);
-                                        delete $1;
-                                        exit(ERR_DECLARED);
-                                  }} TK_OC_LE expressao_7 { $$ = $3; $$->add_child($1); $$->add_child($4);
-                                                            $1->set_node_type(Type::INTEGER);
-                                                            int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
-                                                            if (exit_code > 0) exit(exit_code);
-                                                            Symbol s{
-                                                                $1->get_line_no(), 
-                                                                Kind::VARIABLE, 
-                                                                Type::INTEGER, 
-                                                                get_size_from_type(Type::INTEGER), 
-                                                                $3,
-                                                                0
-                                                            };
-                                                            symbol_table_stack.insert_top($1->get_token_val(), s);
-                                                            $$->set_node_type(Type::INTEGER);
-                                                          };
+                        delete $1;
+                        exit(ERR_DECLARED);
+                    }
+                } TK_OC_LE expressao_7 { 
+                    $$ = $3; 
+                    $$->add_child($1); 
+                    $$->add_child($4);
+                    $1->set_node_type(Type::INTEGER);
+                    int exit_code = get_char_err($1->get_node_type(), $4->get_node_type());
+                    if (exit_code > 0) 
+                        exit(exit_code);
+                    Symbol symbol{
+                        $1->get_line_no(), 
+                        Kind::VARIABLE, 
+                        Type::INTEGER, 
+                        get_size_from_type(Type::INTEGER), 
+                        $3,
+                        0
+                    };
+                    symbol_table_stack.insert_top($1->get_token_val(), symbol);
+                    $$->set_node_type(Type::INTEGER);
+
+                    // código de atribuição
+                    $$->code_element.copy_code($4->code_element.code);
+                    Symbol s = symbol_table_stack.get_first_symbol($1->get_token_val());
+                    auto dest = get_new_register();
+                    auto value = $4->code_element.temporary;
+                    // pega endereço de memória da variavel
+                    $$->code_element.code.push_back(Command(Instruct::ADD_I, ILOC_Code::RFP, s.desloc, dest, NO_REG));
+                    // salva valor nesse endereço de memória
+                    $$->code_element.code.push_back(Command(Instruct::STORE, value, NO_REG, dest, NO_REG));
+                };
 
 /* ponto flutuante */
 lista_var_local_float: %empty {$$ = nullptr;}
@@ -505,6 +537,7 @@ atribuicao: identificador '=' expressao_7 {
 					            exit(exit_code);
                             }
                             $$->set_node_type($1->get_node_type());
+
                             auto dest = $1->code_element.temporary;
                             auto value = $3->code_element.temporary;
                             $$->code_element.code = $1->code_element.code;
@@ -558,19 +591,36 @@ lista_indices: expressao_7 {$$ = $1;}
 
 /* Chamada de função */
 cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
-                                if (symbol_table_stack.is_not_declared($1->get_token_val())) {
-                                	send_error_message($1, ERR_UNDECLARED);
-                                	exit(ERR_UNDECLARED);
-                                }
-                                auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
-                                int exit_code = get_bad_usage_err(s.kind, Kind::FUNCTION);
-                                if (exit_code > 0) {
-                                    send_error_message($1, exit_code);
-                                    exit(exit_code);
-                                }
-                              }
-			 '(' lista_argumentos ')' {$$ = $1; $$->set_is_func_call(true); $$->add_child($4);};
+                    if (symbol_table_stack.is_not_declared($1->get_token_val())) {
+                        send_error_message($1, ERR_UNDECLARED);
+                        exit(ERR_UNDECLARED);
+                    }
+                    auto s = symbol_table_stack.get_first_symbol($1->get_token_val());
+                    int exit_code = get_bad_usage_err(s.kind, Kind::FUNCTION);
+                    if (exit_code > 0) {
+                        send_error_message($1, exit_code);
+                        exit(exit_code);
+                    }
+                }
+			 '(' lista_argumentos ')' {
+                    // carrega tabela de simbolos da função
+                    auto func_symbol_table = symbol_table_stack.recover_symbol_table($1->get_token_val());
+                    $$ = $1; 
+                    $$->set_is_func_call(true); 
+                    $$->add_child($4);
+                    /*
+                        1. Cria um novo registro de ativação
+                        2. Calcula o vínculo estático
+                        3. Passa os parâmetros (organizando-os na pilha)
+                        4. Passa o endereço de retorno para o chamado
+                        5. Transfere o controle para o chamado
+                        6. Salva o estado de execução atual (registradores)
+                        7. Salva o antigo fp na pilha (como vínculo dinâmico)
+                        8. Aloca variáveis locais
+                    */
+                };
 
+// Código retornado carrega 
 lista_argumentos: %empty {$$ = nullptr;}
                 | expressao_7 {$$ = $1;}
                 | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};

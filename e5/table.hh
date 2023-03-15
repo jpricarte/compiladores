@@ -42,6 +42,7 @@ struct SymbolTableStack {;
 private:
     std::vector<SymbolTable> stack {};
     std::vector<size_t> curr_desloc {};
+    std::map<TokenVal, SymbolTable> symbol_table_memory{};
 
     size_t set_desloc(Symbol& s);
 
@@ -50,6 +51,9 @@ public :
     inline void push(SymbolTable& st) { this->stack.push_back(st); curr_desloc.push_back(0); };
     inline void push_new() { this->stack.push_back(SymbolTable{}); curr_desloc.push_back(0); };
     inline void pop() { this->stack.pop_back(); curr_desloc.pop_back(); }; // deleta tabela de cima
+    void pop(TokenVal key);
+    SymbolTable& recover_symbol_table(TokenVal key);
+
     inline SymbolTable& top() { return this->stack.back(); }; // retorna a table mais de cima
         /*
      *  - função para buscar simbolo na pilha: varre a pilha de cima para baixo procurando um simbolo

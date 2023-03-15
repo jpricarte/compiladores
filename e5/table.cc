@@ -76,6 +76,17 @@ int get_bad_usage_err(Kind expected, Kind received) {
     return 0;
 }
 
+void SymbolTableStack::pop(TokenVal key) {
+    SymbolTable st = this->stack.back();
+    symbol_table_memory.insert({ key, st });
+    this->stack.pop_back(); 
+    curr_desloc.pop_back();
+}
+
+SymbolTable& SymbolTableStack::recover_symbol_table(TokenVal key) {
+    return this->symbol_table_memory[key];
+}
+
 int SymbolTableStack::find_symbol_table(TokenVal key) {
     int i = this->stack.size()-1;
     for (; i>=0; i--) {
