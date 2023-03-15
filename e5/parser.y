@@ -14,6 +14,8 @@ int yylex(void);
 void yyerror (const char *msg);
 
 SymbolTableStack symbol_table_stack{};
+ILOC_Code::lab_t main_label = 0;
+std::vector<std::vector<ILOC_Code::reg_t>> param_regs {};
 std::vector<std::pair<TokenVal, Symbol>> var_global_list = {};
 int array_size=0;
 
@@ -107,17 +109,24 @@ int array_size=0;
 
 %%
 
-programa: { symbol_table_stack.push_new(); } lista_elem {$$ = $2; arvore = $$; symbol_table_stack.pop(); };
-
-lista_elem: %empty {$$ = nullptr;}
-          | elemento lista_elem {
-            if ($$!=nullptr) {
-                $$ = $1; 
-                $$->add_child($2);
-            } else {
-                $$ = $2;
-            }
+programa: { symbol_table_stack.push_new(); } lista_elem {
+            $$ = $2;
+            $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::JUMP_I, NO_REG, NO_REG, main_label, NO_REG});
+            arvore = $$;
+            symbol_table_stack.pop();
         };
+
+lista_elem: %empty { $$ = nullptr; }
+          | elemento lista_elem {
+                if ($$ != nullptr) {
+                    $$ = $1; 
+                    $$->add_child($2);
+                    if ($2 != nullptr)
+                        $$->code_element.copy_code($2->code_element.code);
+                } else {
+                    $$ = $2;
+                }
+            };
 
 // AQUI
 elemento: var_global {$$ = $1; var_global_list.clear();}
@@ -205,6 +214,10 @@ funcao: tipo_primitivo TK_IDENTIFICADOR {
         ')' corpo_funcao { 
                 $$ = $2; $$->add_child($7);
                 lab_t func_label = get_new_label();
+                if (get<std::string>($$->get_token_val()) == "main") {
+                    main_label = func_label;
+                }
+                $$->code_element.code.push_back(Command{func_label, Instruct::NOP});
                 if ($7 != nullptr) {
                     $$->code_element.copy_code($7->code_element.code);
                 }
@@ -285,11 +298,10 @@ lista_var_local_int: %empty {$$ = nullptr;}
                         if ($1 != nullptr) {
                             $$ = $1; 
                             $$->add_child($3);
+                            $$->code_element.code = $1->code_element.code;
+                            $$->code_element.copy_code($3->code_element.code);
                         } else {
                             $$ = $3;
-                            auto other_code = $$->code_element.code;
-                            $$->code_element.code = $3->code_element.code;
-                            $$->code_element.copy_code(other_code);
                         }
                     };
 
@@ -601,6 +613,7 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                         send_error_message($1, exit_code);
                         exit(exit_code);
                     }
+                    param_regs.push_back({});
                 }
 			 '(' lista_argumentos ')' {
                     // carrega tabela de simbolos da função
@@ -618,12 +631,20 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                         7. Salva o antigo fp na pilha (como vínculo dinâmico)
                         8. Aloca variáveis locais
                     */
+                    param_regs.pop_back();
                 };
 
 // Código retornado carrega 
 lista_argumentos: %empty {$$ = nullptr;}
-                | expressao_7 {$$ = $1;}
-                | expressao_7 ',' lista_argumentos {$$ = $1; $$->add_child($3);};
+                | expressao_7 { $$ = $1; param_regs.back().push_back($1->code_element.temporary);}
+                | expressao_7 ',' lista_argumentos {
+                        param_regs.back().push_back($1->code_element.temporary);
+                        $$ = $1;
+                        $$->add_child($3);
+                        if ($3 != nullptr) {
+                            $$->code_element.copy_code($3->code_element.code);
+                        }
+                    };
 
 /* Comando de retorno */
 op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
@@ -1053,7 +1074,7 @@ operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type());
         | literal { $$ = $1; $$->set_node_type($1->get_node_type());
                     CodeElement elem{};
                     elem.temporary = ILOC_Code::get_new_register();
-                    elem.code.push_back(Command{Instruct::LOAD_I, std::get<int>($$->get_token_val()), NO_REG, elem.temporary, NO_REG});
+                    elem.code.push_back(Command{Instruct::LOAD_I, (reg_t) std::get<int>($$->get_token_val()), NO_REG, elem.temporary, NO_REG});
                     $$->code_element = elem;
                 }
         | cham_funcao { $$ = $1; $$->set_node_type($1->get_node_type()); };

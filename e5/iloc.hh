@@ -13,7 +13,7 @@
 #include <sstream>
 
 namespace ILOC_Code {
-    using reg_t = unsigned int;
+    using reg_t = int;
     const ILOC_Code::reg_t NO_REG = 0;
     const ILOC_Code::reg_t RBSS = 1;
     const ILOC_Code::reg_t RFP = 2;
@@ -24,6 +24,9 @@ namespace ILOC_Code {
 	    // Retorna o valor atual e atualiza
 	    return counter++;
 	}
+
+    const ILOC_Code::reg_t RET_ADDR_DESLOC = -4;
+    const ILOC_Code::reg_t RET_VALUE_DESLOC = -8;
     
 	enum Instruct {
 		NOP,
@@ -76,7 +79,7 @@ namespace ILOC_Code {
         CMP_NE
 	};
 
-    using lab_t = unsigned int;
+    using lab_t = int;
     const ILOC_Code::lab_t NO_LABEL = 0;
     static ILOC_Code::lab_t label_id = 1;
 
@@ -112,7 +115,29 @@ namespace ILOC_Code {
         void copy_code(std::vector<ILOC_Code::Command> from);
     };
     
-    /* Talvez colocar algo relacionado a memoria aqui, mas dessociei da aula nesse momento */
 };
+
+/* FORMATO DO REGISTRO DE ATIVAÇÃO
+
+     ______________________
+    |      valor_ret       |
+    |       addr_ret       |
+    |======================| -> Base da pilha (RFP)
+    |        param0        |
+    |        param1        |
+    |          ...         |
+    |        paramN        |
+    |- - - - - - - - - - - |
+    |         var0         |
+    |         var1         |
+    |          ...         |
+    |         varN         |
+    |- - - - - - - - - - - |
+    |    vinc_estatico     |
+    |    vinc_dinamico     |
+    |     
+
+
+*/
 
 #endif // ILOC_HH

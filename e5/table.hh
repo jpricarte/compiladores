@@ -31,6 +31,7 @@ struct Symbol {
     size_t desloc;
 };
 
+// SymbolTable::size() retorna o numero de itens (*4 temos o 1o endereço livre da pilha de vars)
 typedef std::map<TokenVal, Symbol> SymbolTable;
 
 Type type_infer (Type symbol_1, Type symbol_2);

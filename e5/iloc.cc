@@ -74,7 +74,7 @@ static const char *instruct_to_string[] ={
         "cmp_NE"
 };
 
-bool is_in(unsigned int key, std::vector<unsigned int> vec) {
+bool is_in(reg_t key, std::vector<reg_t> vec) {
     if (std::find(vec.begin(), vec.end(), key) != vec.end())
         return true;
     return false;
