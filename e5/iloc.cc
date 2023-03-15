@@ -97,6 +97,7 @@ std::string Command::to_string() {
     std::ostringstream oss;
 
     // Uso de Registradores/Constantes/Labels/xNulo em cada instrução
+    std::vector<reg_t> xxxx {0};
     std::vector<reg_t> RRRx {1, 2, 3, 4, 11, 13, 15, 17, 19, 24, 27, 41, 42, 43, 44, 45, 46};
     std::vector<reg_t> RCRx {5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 23, 26};
     std::vector<reg_t> CxRx {21};
@@ -108,6 +109,8 @@ std::string Command::to_string() {
     std::vector<reg_t> RxLL {40};
 
     // Formando string de retorno
+    if (is_in(this->instruct, xxxx))
+        oss << "L" << this->label << ": ";
     oss << instruct_to_string[this->instruct];
     if (this->op1 >= 0) {
         if (is_in(this->instruct, RRRx))
@@ -133,7 +136,8 @@ std::string Command::to_string() {
             oss << ", " << op2;
     }
 
-    oss << " =>";
+    if (!is_in(this->instruct, xxxx))
+        oss << " =>";
 
     if (is_in(this->instruct, RRRx))
         oss << " r" << get_reg_name(this->op3);
