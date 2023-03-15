@@ -23,6 +23,57 @@ Command::Command(Instruct instruct, reg_t op1, reg_t op2, reg_t op3, reg_t op4) 
     this->op4 = op4;
 }
 
+static const char *instruct_to_string[] ={
+        "nop",
+        "add",
+        "sub",
+        "mult",
+        "div",
+        "addI",
+        "subI",
+        "rsubI",
+        "multI",
+        "divI",
+        "rdivI",
+        "lshift",
+        "lshiftI",
+        "rshift",
+        "rshiftI",
+        "and",
+        "andI",
+        "or",
+        "orI",
+        "xor",
+        "xorI",
+        "loadI",
+        "load",
+        "loadAI",
+        "loadA0",
+        "cload",
+        "cloadAI",
+        "cloadA0",
+        "store",
+        "storeAI",
+        "storeAO",
+        "cstore",
+        "cstoreAI",
+        "cstoreAO",
+        "i2i",
+        "c2c",
+        "c2i",
+        "i2c",
+        // Controle de fluxo
+        "jumpI",
+        "jump",
+        "cbr",
+        "cmp_LT",
+        "cmp_LE",
+        "cmp_EQ",
+        "cmp_GE",
+        "cmp_GT",
+        "cmp_NE"
+};
+
 bool is_in(unsigned int key, std::vector<unsigned int> vec) {
     if (std::find(vec.begin(), vec.end(), key) != vec.end())
         return true;
@@ -31,11 +82,11 @@ bool is_in(unsigned int key, std::vector<unsigned int> vec) {
 
 std::string get_reg_name(reg_t r) {
     if (r == 1)
-        return "rbss";
+        return "bss";
     if (r == 2)
-        return "rfp";
+        return "fp";
     if (r == 3)
-        return "rsp";
+        return "sp";
     return std::to_string(r);
 }
 
@@ -45,7 +96,7 @@ std::string Command::to_string() {
 
     std::ostringstream oss;
 
-    // Uso de registradores/imediatos/labels em cada instrução
+    // Uso de Registradores/Constantes/Labels/xNulo em cada instrução
     std::vector<reg_t> RRRx {1, 2, 3, 4, 11, 13, 15, 17, 19, 24, 27, 41, 42, 43, 44, 45, 46};
     std::vector<reg_t> RCRx {5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 23, 26};
     std::vector<reg_t> CxRx {21};

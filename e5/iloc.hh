@@ -76,57 +76,6 @@ namespace ILOC_Code {
         CMP_NE
 	};
 
-    inline static const char *instruct_to_string[] ={
-            "nop",
-            "add",
-            "sub",
-            "mult",
-            "div",
-            "addI",
-            "subI",
-            "rsubI",
-            "multI",
-            "divI",
-            "rdivI",
-            "lshift",
-            "lshiftI",
-            "rshift",
-            "rshiftI",
-            "and",
-            "andI",
-            "or",
-            "orI",
-            "xor",
-            "xorI",
-            "loadI",
-            "load",
-            "loadAI",
-            "loadA0",
-            "cload",
-            "cloadAI",
-            "cloadA0",
-            "store",
-            "storeAI",
-            "storeAO",
-            "cstore",
-            "cstoreAI",
-            "cstoreAO",
-            "i2i",
-            "c2c",
-            "c2i",
-            "i2c",
-            // Controle de fluxo
-            "jumpI",
-            "jump",
-            "cbr",
-            "cmp_LT",
-            "cmp_LE",
-            "cmp_EQ",
-            "cmp_GE",
-            "cmp_GT",
-            "cmp_NE"
-    };
-
     using lab_t = unsigned int;
     const ILOC_Code::lab_t NO_LABEL = 0;
     static ILOC_Code::lab_t label_id = 1;
@@ -138,7 +87,7 @@ namespace ILOC_Code {
 
     struct Command {
         // INST [r1|c] [r2|c] => <rd|L> [L]
-        // inst   op1   op2       op3   op4
+        // inst  op1    op2       op3   op4
         ILOC_Code::lab_t label;
         ILOC_Code::Instruct instruct;
         ILOC_Code::reg_t op1;
