@@ -1,11 +1,6 @@
-addI r1 => r4
-addI r1 => r4
-
-addI r1, 4 => r5
-addI r1, 4 => r5
-
-addI r1 => r4
-addI r1, 4 => r5
-loadI 2 => r6
-add r5, r6 => r7
-store r7 => r4
+addI rsp, 0 => r4
+addI rsp, 4 => r5
+load r5 => r6
+loadI 2 => r7
+add r6, r7 => r8
+store r8 => r4

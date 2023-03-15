@@ -122,8 +122,8 @@ lista_elem: %empty {$$ = nullptr;}
 
 // AQUI
 elemento: var_global {$$ = $1; var_global_list.clear();}
-        | bloco_comandos {$$=$1;}
-        | funcao {$$ = $1;};
+        | lista_comandos {$$=$1;}
+        // | funcao {$$ = $1;};
 
 /* Definição de variáveis globais dos tipos primitivos */
 var_global: tipo_primitivo lista_id_var_global ';' { $$ = nullptr; 
@@ -952,7 +952,12 @@ expressao_1: operando { $$ = $1; }
                         $$->code_element.temporary = $2->code_element.temporary;
                         } ;
 
-operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type()); }
+operando: identificador { $$ = $1;  $$->set_node_type($1->get_node_type());
+                            // Load do endereço salvo no registrador dentro da temporária
+                            auto old_reg = $1->code_element.temporary;
+                            $$->code_element.temporary = get_new_register();
+                            $$->code_element.code.push_back(Command{Instruct::LOAD, old_reg, NO_REG, $$->code_element.temporary, NO_REG});
+                        }
         | literal { $$ = $1; $$->set_node_type($1->get_node_type());
                     CodeElement elem{};
                     elem.temporary = ILOC_Code::get_new_register();
