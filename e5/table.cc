@@ -152,6 +152,19 @@ std::vector<ILOC_Code::Command> create_call_commands(ILOC_Code::lab_t func_label
     code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::ADD_I, r_ret_addr, -1*INT_SIZE, r_ret_addr, ILOC_Code::NO_REG});
     code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::STORE, ILOC_Code::RPC, ILOC_Code::NO_REG, r_ret_addr, ILOC_Code::NO_REG});
     code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::JUMP_I, func_label, ILOC_Code::NO_REG, ILOC_Code::NO_REG, ILOC_Code::NO_REG});
-    
     return code_list;
+}
+
+std::vector<ILOC_Code::Command> create_return_commands() {
+    const int INT_SIZE = 4;
+
+    ILOC_Code::reg_t r_current_fp = ILOC_Code::get_new_register();
+
+    std::vector<ILOC_Code::Command> result;
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::I2I, ILOC_Code::RFP, ILOC_Code::NO_REG, r_current_fp, ILOC_Code::NO_REG});
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::SUB_I, ILOC_Code::RSP, 2*INT_SIZE, r_current_fp, ILOC_Code::NO_REG});
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::LOAD, ILOC_Code::RFP, ILOC_Code::NO_REG, ILOC_Code::RFP, ILOC_Code::NO_REG});
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::SUB, r_current_fp, ILOC_Code::NO_REG, ILOC_Code::RPC, ILOC_Code::NO_REG});
+
+    return result;
 }

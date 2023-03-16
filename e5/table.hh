@@ -71,5 +71,6 @@ public :
 // note https://cplusplus.com/reference/vector/vector/
 
 std::vector<ILOC_Code::Command> create_call_commands(ILOC_Code::lab_t func_label, SymbolTable table, std::vector<ILOC_Code::reg_t> param_regs);
+std::vector<ILOC_Code::Command> create_return_commands();
 
 #endif // TABLE_HH
