@@ -14,7 +14,8 @@ int yylex(void);
 void yyerror (const char *msg);
 
 SymbolTableStack symbol_table_stack{};
-ILOC_Code::lab_t main_label = 0;
+TokenVal main_token_val;
+ILOC_Code::lab_t main_label = 99;
 std::vector<std::vector<ILOC_Code::reg_t>> param_regs {};
 std::map<TokenVal, ILOC_Code::lab_t> label_memory {};
 
@@ -113,9 +114,18 @@ int array_size=0;
 
 programa: { symbol_table_stack.push_new(); } lista_elem {
             $$ = $2;
-            $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::STORE, RFP, NO_REG, RSP, NO_REG});
-            // TODO: Fazer como chamada de função, para iniciar a tabela
-            $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::JUMP_I, NO_REG, NO_REG, main_label, NO_REG});
+            auto main_symbol_table = symbol_table_stack.recover_symbol_table(main_token_val);
+            std::vector<Command> code = create_call_commands(main_label, main_symbol_table, {});
+            code.insert(code.begin(), Command{Instruct::ADD_I, RSP, 4, RSP, NO_REG});
+            code.insert(code.begin(), Command{Instruct::I2I, RFP, NO_REG, RSP, NO_REG});
+            lab_t end = get_new_label();
+            code.push_back(Command{Instruct::JUMP_I, NO_REG, NO_REG, end, NO_REG});
+            for (auto command : $2->code_element.code) {
+                code.push_back(command);
+            }
+            // TODO: DAR PUSH BACK DUM HALT
+            code.push_back(Command{end, Instruct::NOP});
+            $2->code_element.code = code;
             arvore = $$;
             symbol_table_stack.pop();
         };
@@ -216,20 +226,28 @@ funcao: tipo_primitivo TK_IDENTIFICADOR {
         ')' corpo_funcao { 
                 $$ = $2; 
                 $$->add_child($7);
-
                 lab_t func_label = get_new_label();
-                label_memory.insert({$$->get_token_val(), func_label});
                 if (get<std::string>($$->get_token_val()) == "main") {
                     main_label = func_label;
+                    main_token_val = $$->get_token_val();
                 }
+                label_memory.insert({$$->get_token_val(), func_label});
+
                 $$->code_element.code.push_back(Command{func_label, Instruct::NOP});
+                auto temp = get_new_register();
+                auto n_val = get_new_register();
+                $$->code_element.code.push_back(Command{Instruct::I2I, RFP, NO_REG, temp, NO_REG});
+                $$->code_element.code.push_back(Command{Instruct::SUB_I, temp, 4, temp, NO_REG});
+                $$->code_element.code.push_back(Command{Instruct::LOAD, temp, NO_REG, n_val, NO_REG});
+                $$->code_element.code.push_back(Command{Instruct::ADD_I, n_val, 2, n_val, NO_REG});
+                $$->code_element.code.push_back(Command{Instruct::STORE, n_val, NO_REG, temp, NO_REG});
+
                 if ($7 != nullptr) {
                     $$->code_element.copy_code($7->code_element.code);
                 }
-                /* Soma 1 ao endereço de retorno para não entrar em loop infinito */
-                // $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::})
-                /* Adiciona o código do corpo da função */
-                /* Adiciona código de retorno de função (?) */
+
+                $$->code_element.copy_code(create_return_commands());
+                
                 symbol_table_stack.pop($2->get_token_val());
                 delete $1;
             };
@@ -263,7 +281,6 @@ lista_comandos: %empty {$$ = nullptr;}
                             $$->add_child($3);
                             if ($3 != nullptr) {
                                 $$->code_element.copy_code($3->code_element.code);
-                                $$->code_element.temporary = $3->code_element.temporary;
                             }
                         } else {
                             $$ = $3;
@@ -624,11 +641,14 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
 			 '(' lista_argumentos ')' {
                     // carrega tabela de simbolos da função
                     auto func_symbol_table = symbol_table_stack.recover_symbol_table($1->get_token_val());
+                    auto func_label = label_memory[$1->get_token_val()];
                     $$ = $1; 
                     $$->set_is_func_call(true); 
                     $$->add_child($4);
-
-                    
+                    if ($4 != nullptr) {
+                        $$->code_element.code = $4->code_element.code;
+                    }
+                    $$->code_element.copy_code(create_call_commands(func_label, func_symbol_table, param_regs.back()));
 
                     param_regs.pop_back();
                 };
@@ -646,8 +666,20 @@ lista_argumentos: %empty {$$ = nullptr;}
                     };
 
 /* Comando de retorno */
-op_retorno: TK_PR_RETURN expressao_7 { $$ = $1; $$->add_child($2);
-				       $$->set_node_type($2->get_node_type());};
+op_retorno: TK_PR_RETURN expressao_7 { 
+                $$ = $1; 
+                $$->add_child($2);
+                $$->set_node_type($2->get_node_type());
+                $$->code_element.code = $2->code_element.code;
+                auto temp = get_new_register();
+                $$->code_element.copy_code({
+                    Command{Instruct::I2I, RFP, NO_REG, temp, NO_REG}, // i2i do rfp para o novo reg
+                    Command{Instruct::SUB_I, temp, 8, temp, NO_REG}, // subtrai 8 do novo reg, apontando para o valor de retorno
+                    Command{Instruct::STORE, $2->code_element.temporary, NO_REG, temp, NO_REG}, // salva o que estiver em $2->code_element.temporary no endereço do novo reg
+                });
+                // adiciona o resto do código de retorno
+                $$->code_element.copy_code(create_return_commands());
+            };
 
 /* Controle de fluxo */
 con_fluxo: TK_PR_IF '(' expressao_7 ')' TK_PR_THEN bloco_comandos {$$ = $1; $$->add_child($3); $$->add_child($6);
@@ -1046,7 +1078,7 @@ expressao_2: expressao_1 { $$ = $1; }
                        };
 
 expressao_1: operando { $$ = $1; }
-           | '(' expressao_7 ')' { $$ = $2; $$->code_element = $2->code_element; $$->code_element.temporary = $2->code_element.temporary; }
+           | '(' expressao_7 ')' { $$ = $2; }
            | '-' expressao_1 { $$ = $1; $$->add_child($2); $$->set_node_type($2->get_node_type());
            		       if ($2->get_node_type() == Type::CHARACTER) {
            		       		send_error_message($2, ERR_CHAR_TO_INT);

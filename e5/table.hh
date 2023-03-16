@@ -67,6 +67,7 @@ public :
     // Apenas cria o símbolo, não considera no caso de arranjo (tem que ser atualizado)
     void emplace_top(std::pair<TokenVal, Symbol> p);
     Symbol get_first_symbol(TokenVal key); // Retorna copia, não o original, SIDE-EFFECT: exit(ERR_UNDECLARED) se não encontrar
+
 };
 // note https://cplusplus.com/reference/vector/vector/
 

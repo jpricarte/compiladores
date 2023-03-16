@@ -32,6 +32,7 @@ std::string node_type_to_string (Type tt);
 
 typedef std::variant<std::string, int, float, char, bool> TokenVal;
 
+
 struct LexicalVal {
     int line_no;
     TokenType token_type;

@@ -1,12 +1,8 @@
-
-int foo() {
-    int z, x <= 5, y <= 10;
-    z = 3;
-}
-
 int bar(int a, int b, int c, int d, int e) {
-    e=99;
+    e = 99;
+    return b;
 }
 
 int main() {
+    int a <= bar(1, 2, 3, 4, 5);
 }

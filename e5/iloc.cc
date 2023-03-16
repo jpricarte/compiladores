@@ -112,7 +112,7 @@ std::string Command::to_string() {
 
     // Formando string de retorno
     if (is_in(this->instruct, xxxx))
-        oss << "L" << this->label << ": ";
+        oss << "L" << this->label << ":\n";
     oss << instruct_to_string[this->instruct];
     if (this->op1 >= 0) {
         if (is_in(this->instruct, RRRx))
