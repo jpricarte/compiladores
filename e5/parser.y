@@ -679,6 +679,7 @@ op_retorno: TK_PR_RETURN expressao_7 {
                 });
                 // adiciona o resto do código de retorno
                 $$->code_element.copy_code(create_return_commands());
+                $$->code_element.temporary = temp;
             };
 
 /* Controle de fluxo */
