@@ -649,7 +649,6 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                         $$->code_element.code = $4->code_element.code;
                     }
                     $$->code_element.copy_code(create_call_commands(func_label, func_symbol_table, param_regs.back()));
-
                     param_regs.pop_back();
                 };
 
