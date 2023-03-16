@@ -169,7 +169,9 @@ std::vector<ILOC_Code::Command> create_return_commands() {
     result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::SUB_I, r_current_fp, 2 * INT_SIZE, ILOC_Code::RSP, ILOC_Code::NO_REG});
     result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::LOAD, ILOC_Code::RFP, ILOC_Code::NO_REG, ILOC_Code::RFP, ILOC_Code::NO_REG});
     result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::SUB_I, r_current_fp, INT_SIZE, r_current_fp, ILOC_Code::NO_REG});
-    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::JUMP, ILOC_Code::NO_REG, ILOC_Code::NO_REG, r_current_fp, ILOC_Code::NO_REG});
+    ILOC_Code::reg_t r_return_addr = ILOC_Code::get_new_register();
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::LOAD, r_current_fp, ILOC_Code::NO_REG, r_return_addr, ILOC_Code::NO_REG});
+    result.push_back(ILOC_Code::Command{ILOC_Code::Instruct::JUMP, ILOC_Code::NO_REG, ILOC_Code::NO_REG, r_return_addr, ILOC_Code::NO_REG});
 
     return result;
 }
