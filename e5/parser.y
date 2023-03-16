@@ -16,6 +16,8 @@ void yyerror (const char *msg);
 SymbolTableStack symbol_table_stack{};
 ILOC_Code::lab_t main_label = 0;
 std::vector<std::vector<ILOC_Code::reg_t>> param_regs {};
+std::map<TokenVal, ILOC_Code::lab_t> label_memory {};
+
 std::vector<std::pair<TokenVal, Symbol>> var_global_list = {};
 int array_size=0;
 
@@ -212,8 +214,11 @@ funcao: tipo_primitivo TK_IDENTIFICADOR {
             } 
         '(' lista_parametros
         ')' corpo_funcao { 
-                $$ = $2; $$->add_child($7);
+                $$ = $2; 
+                $$->add_child($7);
+
                 lab_t func_label = get_new_label();
+                label_memory.insert({$$->get_token_val(), func_label});
                 if (get<std::string>($$->get_token_val()) == "main") {
                     main_label = func_label;
                 }
@@ -221,7 +226,8 @@ funcao: tipo_primitivo TK_IDENTIFICADOR {
                 if ($7 != nullptr) {
                     $$->code_element.copy_code($7->code_element.code);
                 }
-                /* Copia o código de criação de parametros, end de retorno e criação de frame (ajustar desloc) */
+                /* Soma 1 ao endereço de retorno para não entrar em loop infinito */
+                // $$->code_element.code.insert($$->code_element.code.begin(), Command{Instruct::})
                 /* Adiciona o código do corpo da função */
                 /* Adiciona código de retorno de função (?) */
                 symbol_table_stack.pop($2->get_token_val());
@@ -621,16 +627,8 @@ cham_funcao: TK_IDENTIFICADOR { // Tem que ser função, se não é erro
                     $$ = $1; 
                     $$->set_is_func_call(true); 
                     $$->add_child($4);
-                    /*
-                        1. Cria um novo registro de ativação
-                        2. Calcula o vínculo estático
-                        3. Passa os parâmetros (organizando-os na pilha)
-                        4. Passa o endereço de retorno para o chamado
-                        5. Transfere o controle para o chamado
-                        6. Salva o estado de execução atual (registradores)
-                        7. Salva o antigo fp na pilha (como vínculo dinâmico)
-                        8. Aloca variáveis locais
-                    */
+
+                    
 
                     param_regs.pop_back();
                 };

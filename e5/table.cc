@@ -124,3 +124,34 @@ size_t SymbolTableStack::set_desloc(Symbol& s) {
     this->curr_desloc[this->stack.size()-1] += s.size;
     return s.desloc;
 }
+
+
+std::vector<ILOC_Code::Command> create_call_commands(ILOC_Code::lab_t func_label, SymbolTable table, std::vector<ILOC_Code::reg_t> param_regs) {
+    const int INT_SIZE = 4;
+    std::vector<ILOC_Code::Command> code_list {};
+
+    ILOC_Code::reg_t r_new_fp = ILOC_Code::get_new_register();
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::I2I, ILOC_Code::RSP, ILOC_Code::NO_REG, r_new_fp, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::ADD_I, r_new_fp, 2 * INT_SIZE, r_new_fp, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::STORE, ILOC_Code::RFP, ILOC_Code::NO_REG, r_new_fp, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::I2I, r_new_fp, ILOC_Code::NO_REG, ILOC_Code::RFP, ILOC_Code::NO_REG});
+
+    int i = INT_SIZE;
+    for (auto reg : param_regs) {
+        code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::STORE_AI, reg, ILOC_Code::NO_REG, ILOC_Code::RFP, i});
+    }
+
+    // guarda 
+    int stack_size = table.size() * INT_SIZE;
+    int rsp_index = stack_size + INT_SIZE;
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::STORE_AI, ILOC_Code::RFP, rsp_index, ILOC_Code::RSP, ILOC_Code::NO_REG});
+
+    // guarda endereço de retorno
+    ILOC_Code::reg_t r_ret_addr = ILOC_Code::get_new_register();
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::I2I, ILOC_Code::RFP, ILOC_Code::NO_REG, r_ret_addr, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::ADD_I, r_ret_addr, -1*INT_SIZE, r_ret_addr, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::STORE, ILOC_Code::RPC, ILOC_Code::NO_REG, r_ret_addr, ILOC_Code::NO_REG});
+    code_list.push_back(ILOC_Code::Command{ILOC_Code::Instruct::JUMP_I, func_label, ILOC_Code::NO_REG, ILOC_Code::NO_REG, ILOC_Code::NO_REG});
+    
+    return code_list;
+}

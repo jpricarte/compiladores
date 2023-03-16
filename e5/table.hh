@@ -49,8 +49,8 @@ private:
 
 public :
     // funções para manipular stack;
-    inline void push(SymbolTable& st) { this->stack.push_back(st); curr_desloc.push_back(0); };
-    inline void push_new() { this->stack.push_back(SymbolTable{}); curr_desloc.push_back(0); };
+    inline void push(SymbolTable& st) { this->stack.push_back(st); curr_desloc.push_back(4); };
+    inline void push_new() { this->stack.push_back(SymbolTable{}); curr_desloc.push_back(4); };
     inline void pop() { this->stack.pop_back(); curr_desloc.pop_back(); }; // deleta tabela de cima
     void pop(TokenVal key);
     SymbolTable& recover_symbol_table(TokenVal key);
@@ -70,5 +70,6 @@ public :
 };
 // note https://cplusplus.com/reference/vector/vector/
 
+std::vector<ILOC_Code::Command> create_call_commands(ILOC_Code::lab_t func_label, SymbolTable table, std::vector<ILOC_Code::reg_t> param_regs);
 
 #endif // TABLE_HH

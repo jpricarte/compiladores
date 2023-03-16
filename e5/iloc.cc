@@ -87,6 +87,8 @@ std::string get_reg_name(reg_t r) {
         return "fp";
     if (r == 3)
         return "sp";
+    if (r == 4)
+        return "pc";
     return std::to_string(r);
 }
 
@@ -178,3 +180,6 @@ void CodeElement::copy_code(std::vector<ILOC_Code::Command> from) {
         this->code.push_back(e);
     }
 }
+
+
+

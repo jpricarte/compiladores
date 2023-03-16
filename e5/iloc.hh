@@ -18,7 +18,8 @@ namespace ILOC_Code {
     const ILOC_Code::reg_t RBSS = 1;
     const ILOC_Code::reg_t RFP = 2;
     const ILOC_Code::reg_t RSP = 3;
-	static ILOC_Code::reg_t counter = 4;
+    const ILOC_Code::reg_t RPC = 4;
+	static ILOC_Code::reg_t counter = 5;
 	
 	inline ILOC_Code::reg_t get_new_register() {
 	    // Retorna o valor atual e atualiza
