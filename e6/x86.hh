@@ -29,6 +29,11 @@ namespace x86 {
             return "%"+registers[reg_id];
         }
 
+        // LEMBRAR DE COLOCAR O DESLOCAMENTO INVERTIDO
+        inline std::string reg_inderect_as_atnt(int reg_id, int desloc) {
+            return to_string(desloc)+"(%"+registers[reg_id]+")";
+        }
+
         inline void free_reg(int reg_id) {
             this->in_use[reg_id] = false;
         }
