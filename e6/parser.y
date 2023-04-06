@@ -245,6 +245,20 @@ funcao: tipo_primitivo TK_IDENTIFICADOR {
                 $$->iloc_code_element.code.push_back(Command{Instruct::ADD_I, n_val, 2, n_val, NO_REG});
                 $$->iloc_code_element.code.push_back(Command{Instruct::STORE, n_val, NO_REG, temp, NO_REG});
 
+/*
+// TODO: chamada de função
+	        $$->x86_code_element = x86::CodeElement{};
+	    	$$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+
+	        .globl	testingaaaa
+                	.type	testingaaaa, @function
+                testingaaaa:
+	    auto op1 = $1->x86_code_element.temp_reg_id;
+	    auto op2 = $3->x86_code_element.temp_reg_id;
+	    $$->x86_code_element.temp_reg_id = op2;
+	    x86_control.free_reg(op1);
+*/
+
                 if ($7 != nullptr) {
                     $$->iloc_code_element.copy_code($7->iloc_code_element.code);
                 }
@@ -769,6 +783,15 @@ expressao_7: expressao_6 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::OR, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			    $$->x86_code_element = x86::CodeElement{};
+		    	    $$->x86_code_element.code = $1->x86_code_element.code;
+		      	    $$->x86_code_element.copy_code($3->x86_code_element.code);
+			    auto op1 = $1->x86_code_element.temp_reg_id;
+			    auto op2 = $3->x86_code_element.temp_reg_id;
+			    $$->x86_code_element.temp_reg_id = op2;
+			    $$->x86_code_element.code.push_back(x86::Command("or", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+			    x86_control.free_reg(op1);
                         };
 
 expressao_6: expressao_5 { $$ = $1; }
@@ -786,6 +809,15 @@ expressao_6: expressao_5 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::AND, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			    $$->x86_code_element = x86::CodeElement{};
+		    	    $$->x86_code_element.code = $1->x86_code_element.code;
+		    	    $$->x86_code_element.copy_code($3->x86_code_element.code);
+			    auto op1 = $1->x86_code_element.temp_reg_id;
+			    auto op2 = $3->x86_code_element.temp_reg_id;
+			    $$->x86_code_element.temp_reg_id = op2;
+			    $$->x86_code_element.code.push_back(x86::Command("and", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+			    x86_control.free_reg(op1);
                         };
 
 
@@ -820,6 +852,17 @@ expressao_5: expressao_4 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_EQ, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			    $$->x86_code_element = x86::CodeElement{};
+		   	    $$->x86_code_element.code = $1->x86_code_element.code;
+		  	    $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+		    auto op1 = $1->x86_code_element.temp_reg_id;
+		    auto op2 = $3->x86_code_element.temp_reg_id;
+		    $$->x86_code_element.temp_reg_id = op2;
+		    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+		    x86_control.free_reg(op1);
+*/
                         }
            | expressao_5 TK_OC_NE expressao_4 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
@@ -851,6 +894,17 @@ expressao_5: expressao_4 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_NE, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			   $$->x86_code_element = x86::CodeElement{};
+		    	   $$->x86_code_element.code = $1->x86_code_element.code;
+		    	   $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+		    auto op1 = $1->x86_code_element.temp_reg_id;
+		    auto op2 = $3->x86_code_element.temp_reg_id;
+		    $$->x86_code_element.temp_reg_id = op2;
+		    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+		    x86_control.free_reg(op1);
+*/
                         };
 
 expressao_4: expressao_3 { $$ = $1; }
@@ -878,6 +932,17 @@ expressao_4: expressao_3 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_LT, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			    $$->x86_code_element = x86::CodeElement{};
+		            $$->x86_code_element.code = $1->x86_code_element.code;
+		  	    $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+		    auto op1 = $1->x86_code_element.temp_reg_id;
+		    auto op2 = $3->x86_code_element.temp_reg_id;
+		    $$->x86_code_element.temp_reg_id = op2;
+		    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+		    x86_control.free_reg(op1);
+*/
                         }
            | expressao_4 '>' expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
                             $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
@@ -903,6 +968,17 @@ expressao_4: expressao_3 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_GT, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			    $$->x86_code_element = x86::CodeElement{};
+		   	    $$->x86_code_element.code = $1->x86_code_element.code;
+		            $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+		    auto op1 = $1->x86_code_element.temp_reg_id;
+		    auto op2 = $3->x86_code_element.temp_reg_id;
+		    $$->x86_code_element.temp_reg_id = op2;
+		    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+		    x86_control.free_reg(op1);
+*/
                         }
            | expressao_4 TK_OC_LE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
            					$$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
@@ -928,6 +1004,17 @@ expressao_4: expressao_3 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_LE, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+			$$->x86_code_element = x86::CodeElement{};
+		        $$->x86_code_element.code = $1->x86_code_element.code;
+		        $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+		    auto op1 = $1->x86_code_element.temp_reg_id;
+		    auto op2 = $3->x86_code_element.temp_reg_id;
+		    $$->x86_code_element.temp_reg_id = op2;
+		    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+		    x86_control.free_reg(op1);
+*/
                         }
            | expressao_4 TK_OC_GE expressao_3 { $$ = $2; $$->add_child($1); $$->add_child($3);
                             $$->set_node_type(type_infer($1->get_node_type(), $3->get_node_type()));
@@ -953,6 +1040,17 @@ expressao_4: expressao_3 { $$ = $1; }
                             $$->iloc_code_element.copy_code($3->iloc_code_element.code);
                             $$->iloc_code_element.temporary = get_new_register();
                             $$->iloc_code_element.code.push_back(Command(Instruct::CMP_GE, $1->iloc_code_element.temporary, $3->iloc_code_element.temporary, $$->iloc_code_element.temporary, NO_REG));
+
+                            $$->x86_code_element = x86::CodeElement{};
+			    $$->x86_code_element.code = $1->x86_code_element.code;
+			    $$->x86_code_element.copy_code($3->x86_code_element.code);
+/*
+			    auto op1 = $1->x86_code_element.temp_reg_id;
+			    auto op2 = $3->x86_code_element.temp_reg_id;
+			    $$->x86_code_element.temp_reg_id = op2;
+		     	    $$->x86_code_element.code.push_back(x86::Command("add", x86_control.reg_as_atnt(op1), x86_control.reg_as_atnt(op2), false));
+			    x86_control.free_reg(op1);
+  */
                             };
 
 
