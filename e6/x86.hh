@@ -30,7 +30,7 @@ namespace x86 {
         }
 
         // LEMBRAR DE COLOCAR O DESLOCAMENTO INVERTIDO
-        inline std::string reg_inderect_as_atnt(int reg_id, int desloc) {
+        inline std::string rbp_inderect_as_atnt(int reg_id, int desloc) {
             return to_string(desloc)+"(%"+registers[reg_id]+")";
         }
 
