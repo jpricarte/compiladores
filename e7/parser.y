@@ -5,6 +5,7 @@
 #include "table.hh"
 #include "iloc.hh"
 #include "x86.hh"
+#include "fcg.hh"
 
 
 extern int get_line_number();
@@ -129,6 +130,9 @@ programa: { symbol_table_stack.push_new(); } lista_elem {
             $2->iloc_code_element.code = code;
             arvore = $$;
             symbol_table_stack.pop();
+	    FCG fcg;
+	    fcg.fromILOC($$->iloc_code_element.code);
+
         };
 
 lista_elem: %empty { $$ = nullptr; }

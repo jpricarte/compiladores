@@ -5,13 +5,15 @@
 #include <string>
 #include "iloc.hh"
 
+using namespace std;
+
 class FCG {
 private:
     vector<int> nodes;
     vector<pair<int, int>> edges;
 
 public:
-    void fromILOC(ILOC_Code::CodeElement);
+    void fromILOC(std::vector<ILOC_Code::Command> code);
     string toDOT();
 };
 

@@ -34,7 +34,7 @@ namespace ILOC_Code {
         ADD,
         SUB,
         MULT,
-        DIV,w
+        DIV,
         ADD_I,
         SUB_I,
         RSUB_I,

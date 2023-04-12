@@ -168,9 +168,8 @@ std::string Command::to_string() {
         if (is_in(this->instruct, RxLL))
             oss << ", L" << op4;
     }
-
-    oss << std::endl;
-    std::cout << oss.str();
+//    oss << std::endl;
+//    std::cout << oss.str();
 
     return oss.str();
 }

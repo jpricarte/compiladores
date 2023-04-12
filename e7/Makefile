@@ -1,4 +1,4 @@
-ETAPA=etapa6
+ETAPA=etapa7
 FLAGS=-Wall -g -Wno-unused-function
 COMP=g++ --std=c++20 ${FLAGS}
 
