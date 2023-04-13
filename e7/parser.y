@@ -132,7 +132,7 @@ programa: { symbol_table_stack.push_new(); } lista_elem {
             symbol_table_stack.pop();
 	    FCG fcg;
 	    fcg.fromILOC($$->iloc_code_element.code);
-
+	    fcg.toDOT("graph.dot");
         };
 
 lista_elem: %empty { $$ = nullptr; }

@@ -14,7 +14,7 @@ private:
 
 public:
     void fromILOC(std::vector<ILOC_Code::Command> code);
-    string toDOT();
+    void toDOT(string filename);
 };
 
 

@@ -16,6 +16,7 @@ Command::Command(ILOC_Code::lab_t label, Instruct instruct) {
 }
 
 Command::Command(Instruct instruct, reg_t op1, reg_t op2, reg_t op3, reg_t op4) {
+    this->label = -1;
     this->instruct = instruct;
     this->op1 = op1;
     this->op2 = op2;

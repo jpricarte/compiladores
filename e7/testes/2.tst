@@ -1,8 +1,5 @@
-int foo(int a) {
-    a = 3;
-    return a;
-}
-
 int main() {
-    foo(1);
+    while(1) {
+       int a <= 1;
+    };
 }

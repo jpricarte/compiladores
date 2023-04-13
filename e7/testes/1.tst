@@ -1,5 +1,8 @@
 int bar(int a, int b, int c, int d, int e) {
     e = 99;
+    if (a > b) then {
+        return a;
+    };
     return b;
 }
 
