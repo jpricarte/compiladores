@@ -1,13 +1,12 @@
-int a, b;
+int mar() {
+
+}
 
 int foo () {
-    return 10;
-}
-int bar () {
-    return 20;
+    mar();
 }
 
 int main() {
     foo();
-    bar();
+    // bar();
 }

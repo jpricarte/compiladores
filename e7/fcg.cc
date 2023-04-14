@@ -18,7 +18,7 @@ int FCG::getDominator(int block) {
 
     for (auto edge : this->edges) {
         cout << edge.first << " -> " << edge.second << endl;
-        if (edge.second == block) {
+        if (edge.second == block && edge.second >= edge.first) {
             cout << "found " << endl;
             return getDominator(edge.first);
         }
@@ -60,15 +60,13 @@ void FCG::fromILOC(vector<ILOC_Code::Command> code) {
         switch (command.instruct) {
 
             case ILOC_Code::STORE: // call
-                if (cur_block != 1 and command.op1 == ILOC_Code::RPC) {
+                if (command.op1 == ILOC_Code::RPC) {
                     cout << "[FOUND CALL]" << endl;
-                    is_call = true;
                 }
                 break;
 
             case ILOC_Code::JUMP: // ret
                 cout << "[FIM DE BLOCO por jump]" << endl;
-                dominators.emplace_back(cur_block, this->getDominator(cur_block));
                 on_block = false;
                 break;
 
@@ -95,6 +93,11 @@ void FCG::fromILOC(vector<ILOC_Code::Command> code) {
         on_block = false;
     }   // fim da 1a passada
 
+    for (auto it : block2label) {
+        int bl = it.first;
+        int lab = it.second;
+        this->edges.emplace_back(bl, label2block[lab]);
+    }
 
 
     // 2a passada
@@ -120,10 +123,12 @@ void FCG::fromILOC(vector<ILOC_Code::Command> code) {
 
             case ILOC_Code::JUMP: // ret
                 cout << "[2. FIM DE BLOCO por jump]" << endl;
+                dominators.emplace_back(cur_block, this->getDominator(cur_block));
                 on_block = false;
                 break;
 
             case ILOC_Code::JUMP_I:
+                on_block = false;
                 if (is_call) {
                     is_call = false;
                     // Percorrer toda a lista de dominadores
@@ -134,12 +139,14 @@ void FCG::fromILOC(vector<ILOC_Code::Command> code) {
                     for (auto dom_bl : dominators) {
                         int ret_block = dom_bl.first;
                         int dominator = dom_bl.second;
-                        cout << target_block << " vs " << dominator << ": " << ret_block << "->" << cur_block+1 << endl;
+                        cout << "cur_block: " << cur_block << ", dom: " << dominator << " | " << ret_block << " -> " << cur_block+1 << endl;
                         if (dominator == target_block) {
                             // fala "a função que esta sendo chamada retorna depois daqui"
                             this->edges.emplace_back(ret_block, cur_block+1);
                         }
                     }
+                } else {
+
                 }
                 break;
 
@@ -153,11 +160,6 @@ void FCG::fromILOC(vector<ILOC_Code::Command> code) {
         }
     }
 
-    for (auto it : block2label) {
-        int bl = it.first;
-        int lab = it.second;
-        this->edges.emplace_back(bl, label2block[lab]);
-    }
 
     cout << "\n\nNODES" << endl;
     for (auto node : nodes)
@@ -194,6 +196,9 @@ void FCG::toDOT(string filename) {
     ostringstream oss;
 
     oss << "digraph FlowControlGraph {" << endl;
+    for (auto node : this->nodes) {
+        oss << "\t" << node  << ";" << endl;
+    }
     for (auto edge : this->edges) {
         oss << "\t" << edge.first << " -> "
         << edge.second << ";" << endl;
