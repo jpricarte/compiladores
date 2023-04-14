@@ -75,8 +75,8 @@ void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
     bool on_block = false;
     map<int, int> label2block;
     vector<pair<int, int>> block2label;
-    vector<int> stack;
-
+    vector<pair<int, int>> dominators; // dominado -> dominador
+    bool is_call = false;
 
     for (ILOC_Code::Command command : code) {
         if (command.label > 0) {
@@ -104,24 +104,10 @@ void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
                 }
                 break;
 
-            case ILOC_Code::JUMP:
-                /*
-                 * Essa lógica não vai funcionar s ler o código de forma linear
-                 * para seguir a logica de pilha, teriamos que ler o código usando a
-                 * ordem do grafo. Ou seja:
-                 * Gera o multigrafo da forma que estamos fazendo atualmente
-                 * Terminando, vamos começar a ler o código a partir do bloco 1 e ir
-                 * na ordem do grafo.
-                 * Ai fazemos a lógica de empilhar e desempilhar
-                 */
+            case ILOC_Code::JUMP: // ret
                 cout << "[FIM DE BLOCO por jump]" << endl;
+                dominators.emplace_back(cur_block, this->getDominator(cur_block));
                 on_block = false;
-                if (!stack.empty()) {
-                    cout << "DESEMPILHA" << stack.back() <<  endl;
-                    this->edges.emplace_back(cur_block, stack.back());
-                    stack.pop_back();
-                }
-//                block2label.emplace_back(cur_block, command.op3);
                 break;
 
             case ILOC_Code::JUMP_I:
