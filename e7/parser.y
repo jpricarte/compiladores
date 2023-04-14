@@ -132,6 +132,13 @@ programa: { symbol_table_stack.push_new(); } lista_elem {
             symbol_table_stack.pop();
 	    FCG fcg;
 	    fcg.fromILOC($$->iloc_code_element.code);
+	    cout << "DOM de 1 é " << fcg.getDominator(1) << endl;
+	    cout << "DOM de 7 é " << fcg.getDominator(7) << endl;
+	    cout << "DOM de 3 é " << fcg.getDominator(3) << endl;
+	    cout << "DOM de 4 é " << fcg.getDominator(4) << endl;
+	    cout << "DOM de 5 é " << fcg.getDominator(5) << endl;
+	    cout << "DOM de 2 é " << fcg.getDominator(2) << endl;
+	    cout << "DOM de 9 é " << fcg.getDominator(9) << endl;
 	    fcg.toDOT("graph.dot");
         };
 

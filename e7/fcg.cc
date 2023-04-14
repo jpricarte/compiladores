@@ -3,68 +3,30 @@
 #include <vector>
 #include <map>
 #include <fstream>
+#include <bits/stdc++.h>
 #include "fcg.hh"
 
-//void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
-//    /* TODO
-//     * Varrer comandos ILOC.
-//     * Implementar lógica para guardar informações relevantes e gerar grafo.
-//     * Escrever nodos e arestas diretamente nos atributos da classe.
-//     * 2 passadas?
-//     * */
-//    int cur_block = 0;
-//    bool on_block = false;
-//    bool on_cbr = false;
-//    for (ILOC_Code::Command command : code) {
-//        if (not on_block) {
-//            cout << "[COMEÇO DE BLOCO "<<to_string(cur_block)<<"]" << endl;
-//            on_block = true;
-//            cur_block += 1;
-//            this->nodes.push_back(cur_block);
-//        }
-//
-//        string com = command.to_string();
-//        cout << com;
-//
-//        // analysis
-//        bool found_jump = com.find("jump") != string::npos;
-//        bool found_cbr = com.find("cbr") != string::npos;
-//        cout << endl;
-//
-//        cout << "\t[FIM DE BLOCO "<<to_string(cur_block)<<"]";
-//        on_block = false;
-//        if (found_jump) {
-//            this->edges.push_back(make_pair(cur_block, cur_block + 1));
-//        } else if (found_cbr) {
-//
-//        }
-//
-//        if (found_jump or found_cbr) {
-//            cout << "\t[FIM DE BLOCO "<<to_string(cur_block)<<"]";
-//            on_block = false;
-//
-//            if (on_cbr) {
-//                on_cbr = false;
-//                this->edges.push_back(make_pair(cur_block-1, cur_block + 1));
-//            } else {
-//                if (found_cbr) {
-//                    on_cbr = true;
-//                }
-//                this->edges.push_back(make_pair(cur_block, cur_block + 1));
-//            }
-//        }
-//    }
-//
-//    cout << "NODES" << endl;
-//    for (auto node : nodes)
-//        cout << node << endl;
-//    cout << "EDGES" << endl;
-//    for (auto edge : edges)
-//        cout << edge.first << ", " << edge.second << endl;
-//
-//}
+using namespace std;
 
-void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
+
+int FCG::getDominator(int block) {
+    bool findBlock = (find(this->nodes.begin(), this->nodes.end(), block) != this->nodes.end());
+    if (not findBlock)
+        return -1;
+
+    cout << "BUSCANDO DOMINADOR DE " << block << endl;
+
+    for (auto edge : this->edges) {
+        cout << edge.first << " -> " << edge.second << endl;
+        if (edge.second == block) {
+            cout << "found " << endl;
+            return getDominator(edge.first);
+        }
+    }
+    return block;
+}
+
+void FCG::fromILOC(vector<ILOC_Code::Command> code) {
     /*
      * Varrer comandos ILOC.
      * Implementar lógica para guardar informações relevantes e gerar grafo.
@@ -97,10 +59,10 @@ void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
 
         switch (command.instruct) {
 
-            case ILOC_Code::STORE:
-                if (command.op1 == ILOC_Code::RPC) {
-                    cout << "EMPILHA" << endl;
-                    stack.push_back(cur_block);
+            case ILOC_Code::STORE: // call
+                if (cur_block != 1 and command.op1 == ILOC_Code::RPC) {
+                    cout << "[FOUND CALL]" << endl;
+                    is_call = true;
                 }
                 break;
 
@@ -131,7 +93,64 @@ void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
     if (on_block) {
         cout << "[FIM DE BLOCO por halt]" << endl;
         on_block = false;
-//        this->edges.emplace_back(prev_block, cur_block);
+    }   // fim da 1a passada
+
+
+
+    // 2a passada
+    is_call = false;
+    on_block = false;
+    cur_block = 0;
+    for (ILOC_Code::Command command : code) {
+        if (command.label > 0) {
+            on_block = true;
+            cur_block += 1;
+            cout << "\n[2. COMEÇO DE BLOCO " << cur_block << " por label " << command.label << "]" << endl;
+        } else if (not on_block) {
+            on_block = true;
+            cur_block += 1;
+        }
+        switch (command.instruct) {
+            case ILOC_Code::STORE: // call
+                if (command.op1 == ILOC_Code::RPC) {
+                    cout << "[2. FOUND CALL]" << endl;
+                    is_call = true;
+                }
+                break;
+
+            case ILOC_Code::JUMP: // ret
+                cout << "[2. FIM DE BLOCO por jump]" << endl;
+                on_block = false;
+                break;
+
+            case ILOC_Code::JUMP_I:
+                if (is_call) {
+                    is_call = false;
+                    // Percorrer toda a lista de dominadores
+                    // Sempre que encontrar o bloco para qual queremos pular:
+                    //  Adicionamos uma aresta entre o retorno (prov. outro bloco) e o bloco SEGUINTE ao que
+                    // estamos atualmente
+                    int target_block = label2block[command.op3];
+                    for (auto dom_bl : dominators) {
+                        int ret_block = dom_bl.first;
+                        int dominator = dom_bl.second;
+                        cout << target_block << " vs " << dominator << ": " << ret_block << "->" << cur_block+1 << endl;
+                        if (dominator == target_block) {
+                            // fala "a função que esta sendo chamada retorna depois daqui"
+                            this->edges.emplace_back(ret_block, cur_block+1);
+                        }
+                    }
+                }
+                break;
+
+            case ILOC_Code::CBR:
+                cout << "[2. FIM DE BLOCO por cbr]" << endl;
+                on_block = false;
+                break;
+
+            default:
+                break;
+        }
     }
 
     for (auto it : block2label) {
@@ -148,6 +167,18 @@ void FCG::fromILOC(std::vector<ILOC_Code::Command> code) {
         cout << edge.first << ", " << edge.second << endl;
 
     // 2a leitura
+    // descobrir dominadores
+    /* Durante a primeira leitura:
+     *  Quando encontrar um retorno (JUMP em registrador):
+     *      Acha o dominador que começa a função
+     *      Guarda as seguintes infos (Bloco de retorno, o dominador)
+     */
+    /* Durante a segunda leitura
+     *  Quando encontrar uma chamada de função:
+     *      Cria uma aresta entre o bloco que chamou e o bloco que será enviado
+     *      Busca o bloco que será enviado entre o cjto de dominadores
+     *      Cria uma aresta entre o(s) bloco(s) que retornam da função e o bloco seguinte a chamada
+     */
 
 }
 
@@ -162,7 +193,7 @@ void FCG::toDOT(string filename) {
      * */
     ostringstream oss;
 
-    oss << "digraph FluxControlGraph {" << endl;
+    oss << "digraph FlowControlGraph {" << endl;
     for (auto edge : this->edges) {
         oss << "\t" << edge.first << " -> "
         << edge.second << ";" << endl;

@@ -15,6 +15,7 @@ private:
 public:
     void fromILOC(std::vector<ILOC_Code::Command> code);
     void toDOT(string filename);
+    int getDominator(int block);
 };
 
 
